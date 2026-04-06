@@ -1,0 +1,29 @@
+/* =========================================================
+   Interfaz.css
+   Estilos personalizados complementarios a Tailwind CSS
+   ========================================================= */
+
+/* Personalización de la barra de desplazamiento (Scrollbar) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Color de la barra en modo claro */
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1; 
+    border-radius: 4px;
+}
+
+/* Color de la barra en modo oscuro */
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+/* Nota: Si en el futuro necesitas agregar animaciones complejas, 
+  efectos de cristal (glassmorphism) o importar fuentes locales, 
+  este es el lugar ideal para hacerlo.
+*/

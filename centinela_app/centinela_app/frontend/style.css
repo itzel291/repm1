@@ -1,0 +1,112 @@
+body{
+
+font-family: Arial, Helvetica, sans-serif;
+background:#f0f2f5;
+margin:0;
+
+}
+
+/* barra superior */
+
+.topbar{
+
+background:#1877f2;
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+}
+
+/* contenedor central */
+
+.container{
+
+width:600px;
+margin:auto;
+margin-top:30px;
+
+}
+
+/* crear publicación */
+
+.crear-post{
+
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+margin-bottom:20px;
+
+}
+
+.crear-post input,
+.crear-post textarea{
+
+width:100%;
+padding:10px;
+margin-top:10px;
+border:1px solid #ddd;
+border-radius:6px;
+
+}
+
+.crear-post textarea{
+
+height:80px;
+
+}
+
+button{
+
+margin-top:10px;
+padding:10px;
+background:#1877f2;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+/* feed */
+
+.feed{
+
+display:flex;
+flex-direction:column;
+gap:20px;
+
+}
+
+/* tarjeta publicación */
+
+.post{
+
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+
+}
+
+.post h3{
+
+margin:0;
+
+}
+
+.post .autor{
+
+color:gray;
+font-size:14px;
+margin-bottom:10px;
+
+}
+
+.post .contenido{
+
+margin-top:10px;
+
+}

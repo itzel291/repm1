@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela — Alerta de Emergencia</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<script src="js/private-contact-config.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+  * { font-family: 'Outfit', sans-serif; }
+
+  @keyframes siren {
+    0%, 100% { background: #EF4444; }
+    50%       { background: #DC2626; }
+  }
+  @keyframes ring {
+    0%   { transform: scale(1);    opacity: 0.8; }
+    100% { transform: scale(2.2);  opacity: 0; }
+  }
+  @keyframes countIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes shakeBtn {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  body { background: #EF4444; animation: siren 1.8s ease-in-out infinite; }
+
+  .ring {
+    position: absolute; inset: 0; border-radius: 9999px;
+    border: 2px solid rgba(255,255,255,0.5);
+    animation: ring 2s ease-out infinite;
+  }
+  .ring-2 { animation-delay: 0.6s; }
+  .ring-3 { animation-delay: 1.2s; }
+
+  .number { animation: countIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  .call-btn { animation: shakeBtn 0.5s ease 1s; }
+  .content { animation: slideUp 0.5s ease forwards; }
+  .notify-btn { animation: slideUp 0.5s ease 0.2s both; }
+
+  .glass {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden relative">
+
+  <!-- Decorative circles background -->
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+    <div class="w-[600px] h-[600px] rounded-full border border-white/10 absolute"></div>
+    <div class="w-[800px] h-[800px] rounded-full border border-white/5 absolute"></div>
+    <div class="w-[1000px] h-[1000px] rounded-full border border-white/5 absolute"></div>
+  </div>
+
+  <!-- Back button -->
+  <button onclick="history.back()" class="absolute top-6 left-6 glass text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-semibold hover:bg-white/25 transition-colors z-10">
+    <span class="material-icons-round text-lg">arrow_back</span>
+    Cancelar
+  </button>
+
+  <!-- Main layout: 3 columns -->
+  <div class="content w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-10 items-center z-10">
+
+    <!-- Left: EMERGENCY circle -->
+    <div class="flex flex-col items-center">
+      <div class="relative w-56 h-56 flex items-center justify-center">
+        <div class="ring"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <div class="w-44 h-44 bg-white rounded-full flex items-center justify-center shadow-2xl relative z-10">
+          <h2 class="text-red-600 text-5xl font-black uppercase leading-none text-center tracking-tighter">EMER<br/>GENCIA</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: 911 -->
+    <div class="flex flex-col items-center text-center gap-4">
+      <p class="text-white/90 text-2xl font-bold uppercase tracking-[0.3em]">Llama al</p>
+      <h1 id="emergency-phone-display" class="number text-white font-black leading-none select-none cursor-default hover:scale-105 transition-transform"
+          style="font-size: clamp(4.8rem,11vw,8rem); text-shadow: 0 4px 40px rgba(0,0,0,0.3);">
+        911
+      </h1>
+      <p id="emergency-phone-label" class="text-white/60 text-sm">Sistema de Alerta Centinela</p>
+    </div>
+
+    <!-- Right: Call button -->
+    <div class="flex flex-col items-center">
+      <a id="emergency-call-link" href="tel:911" class="relative w-56 h-56 flex items-center justify-center group">
+        <div class="ring" style="animation-delay:0.3s"></div>
+        <div class="ring ring-2" style="animation-delay:0.9s"></div>
+        <div class="call-btn w-44 h-44 bg-white rounded-full flex items-center justify-center shadow-2xl relative z-10 group-hover:scale-105 active:scale-95 transition-transform cursor-pointer">
+          <span class="material-icons-round text-red-600 text-8xl -rotate-12 group-hover:rotate-0 transition-transform duration-300">phone_in_talk</span>
+        </div>
+        <span class="absolute -bottom-8 text-white/70 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Click para llamar</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom: Notify authorities -->
+  <div class="notify-btn absolute bottom-8 right-8 z-10">
+    <button onclick="notificarCentinela()" class="glass text-white pl-6 pr-3 py-3 rounded-full flex items-center gap-4 hover:bg-white/25 transition-colors group">
+      <p class="font-bold text-lg text-right leading-tight hidden md:block">¡Notifica a las<br/>autoridades!</p>
+      <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+        <span class="material-icons-round text-red-600 text-3xl">warning</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <p class="absolute bottom-4 left-0 w-full text-center text-white/30 text-xs uppercase tracking-widest">
+    Sistema de Alerta Centinela © 2025
+  </p>
+
+<script>
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || 'Vecino'
+const sosConfig = window.CentinelaSOSConfig || {}
+const emergencyPhone = String(sosConfig.emergencyPhone || '911').trim()
+const displayPhone = String(sosConfig.displayPhone || emergencyPhone || '911').trim()
+const emergencyLabel = String(sosConfig.emergencyLabel || 'Sistema de Alerta Centinela').trim()
+
+document.getElementById('emergency-phone-display').textContent = displayPhone
+document.getElementById('emergency-phone-label').textContent = emergencyLabel
+document.getElementById('emergency-call-link').href = `tel:${emergencyPhone}`
+
+// Notificar a Centinela vía API
+async function notificarCentinela() {
+  if (!token) {
+    alert('Debes iniciar sesión para notificar a las autoridades.')
+    return
+  }
+
+  const btn = document.querySelector('.notify-btn button')
+  btn.textContent = 'Notificando...'
+
+  try {
+    // Obtener ubicación
+    let lat = '', lon = ''
+    if (navigator.geolocation) {
+      await new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(pos => {
+          lat = pos.coords.latitude
+          lon = pos.coords.longitude
+          resolve()
+        }, resolve, { timeout: 3000 })
+      })
+    }
+
+    // Reportar incidencia crítica en el servicio de incidencias
+    const xmlData = `
+    <reporte>
+      <fecha>${new Date().toISOString().split('T')[0]}</fecha>
+      <hora>${new Date().toTimeString().slice(0,5)}</hora>
+      <prioridad>Crítica</prioridad>
+      <descripcion>🚨 ALERTA SOS activada por ${nombre}. Se requiere atención inmediata.</descripcion>
+      <latitud>${lat}</latitud>
+      <longitud>${lon}</longitud>
+      <imagenes>[]</imagenes>
+    </reporte>`
+
+const runtime = window.CentinelaRuntime;
+const INCIDENTS_API = runtime ? runtime.serviceUrl(5001, '/api/reportar_incidencia') : 'http://localhost:5001/api/reportar_incidencia';
+await fetch(INCIDENTS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/xml', 'Authorization': `Token ${token}` },
+      body: xmlData
+    })
+
+    // Redirigir a pantalla de ayuda en camino
+    location.href = 'ayuda.html'
+
+  } catch (err) {
+    console.error(err)
+    location.href = 'ayuda.html'
+  }
+}
+
+// Auto-notificar si mantiene presionado 3 segundos
+let holdTimer
+document.querySelector('.notify-btn button').addEventListener('mousedown', () => {
+  holdTimer = setTimeout(notificarCentinela, 3000)
+})
+document.querySelector('.notify-btn button').addEventListener('mouseup', () => clearTimeout(holdTimer))
+</script>
+</body>
+</html>

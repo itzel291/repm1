@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela - Encuestas</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444',
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+</head>
+<body class="h-screen overflow-hidden flex text-white" data-page="encuestas">
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">home</span>Inicio</a>
+    <a href="avisos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">campaign</span>Avisos</a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">article</span>Publicaciones</a>
+    <a href="eventos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">event</span>Eventos</a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">chat_bubble_outline</span>Mensajes</a>
+    <a href="notificaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">notifications_none</span>Notificaciones</a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">newspaper</span>Noticias</a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">history</span>Historial</a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">person_outline</span>Perfil</a>
+    <div class="pt-4 pb-2"><p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administración</p></div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+  </nav>
+</aside>
+
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Encuestas</h2>
+      <p class="text-text-muted text-sm">Consulta y responde las votaciones activas de la comunidad</p>
+    </div>
+  </header>
+  <main class="flex-1 overflow-y-auto p-8">
+    <section class="max-w-5xl mx-auto space-y-6">
+      <div class="rounded-3xl border border-border-dark bg-surface-darker p-6">
+        <h3 class="text-lg font-bold text-white">Tu opinión cuenta</h3>
+        <p class="text-sm text-text-muted mt-2">Aquí verás las encuestas creadas por administración. Solo puedes responder una vez por pregunta desde tu vivienda.</p>
+      </div>
+      <div id="encuestas-lista" class="space-y-6"></div>
+    </section>
+  </main>
+</div>
+<script src="js/decisiones-app.js?v=20260329c"></script>
+</body>
+</html>

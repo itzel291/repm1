@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Administrador</title>
+<style>
+body { font-family: Arial; margin: 40px; background:#eef2f7;}
+input, button { padding:8px; margin:5px 0; width:300px; }
+</style>
+</head>
+<body>
+
+<h1>Crear Consulta</h1>
+
+<input type="text" id="pregunta" placeholder="Pregunta"><br>
+<input type="text" id="op1" placeholder="Opción 1"><br>
+<input type="text" id="op2" placeholder="Opción 2"><br>
+<button onclick="crearConsulta()">Crear</button>
+
+<p id="msg"></p>
+
+<script>
+const API = "http://127.0.0.1:5000";
+
+async function crearConsulta() {
+    const pregunta = document.getElementById("pregunta").value;
+    const op1 = document.getElementById("op1").value;
+    const op2 = document.getElementById("op2").value;
+
+    const xml = `<consulta>
+                    <pregunta>${pregunta}</pregunta>
+                    <opciones>
+                        <opcion>${op1}</opcion>
+                        <opcion>${op2}</opcion>
+                    </opciones>
+                 </consulta>`;
+
+    const res = await fetch(`${API}/admin/crear-consulta`, {
+        method: "POST",
+        headers: { "Content-Type": "application/xml" },
+        body: xml
+    });
+
+    document.getElementById("msg").innerText = await res.text();
+}
+</script>
+
+</body>
+</html>

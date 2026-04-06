@@ -1,0 +1,793 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centinela · Panel de Administración</title>
+    <script src="js/session-bridge.js"></script>
+    <script src="js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="css/ui-shell.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #141720;
+            --surface2: #1c2030;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --text: #e8eaf0;
+            --muted: #6b7280;
+            --accent: #00c896;
+            --accent2: #00a67d;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --info: #3b82f6;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── LOGIN ─────────────────────────────────────────────────── */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 1rem;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo .icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-logo h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .login-logo p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-login:hover { background: var(--accent2); }
+        .btn-login:active { transform: scale(0.98); }
+
+        .login-error {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            color: #fca5a5;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* ── PANEL ─────────────────────────────────────────────────── */
+        #adminPanel { display: none; }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .topbar-brand span {
+            font-size: 1.1rem;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-badge {
+            background: rgba(0,200,150,0.12);
+            border: 1px solid rgba(0,200,150,0.25);
+            color: var(--accent);
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            border-radius: var(--radius-sm);
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .page-header p {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.1rem 1.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            line-height: 1;
+        }
+
+        .stat-pill {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 6px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .pill-ok { background: rgba(0,200,150,0.12); color: var(--accent); }
+        .pill-warn { background: rgba(245,158,11,0.12); color: var(--warn); }
+        .pill-info { background: rgba(59,130,246,0.12); color: var(--info); }
+        .pill-danger { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+        /* Controles */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .ctrl-input {
+            flex: 1;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem 1rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .ctrl-input:focus { border-color: var(--accent); }
+
+        .ctrl-select {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem 0.9rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .btn-refresh {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Tabla */
+        .tbl-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+        }
+
+        th {
+            background: var(--surface2);
+            color: var(--muted);
+            font-weight: 500;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0,200,150,0.15);
+            border: 1px solid rgba(0,200,150,0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--accent);
+            vertical-align: middle;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .name-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .name-info { display: flex; flex-direction: column; }
+        .name-info .email { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+        .mono { font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+        .muted { color: var(--muted); }
+        .addr { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem; color: var(--muted); }
+
+        /* Mapa */
+        .map-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .map-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .map-header h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .map-count {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        #map {
+            width: 100%;
+            height: 340px;
+        }
+
+        /* Leaflet dark override */
+        .leaflet-tile { filter: brightness(0.7) saturate(0.5); }
+        .leaflet-container { background: #0d0f14; }
+        .leaflet-popup-content-wrapper {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+        }
+        .leaflet-popup-tip { background: var(--surface2); }
+        .leaflet-popup-close-button { color: var(--muted) !important; }
+
+        .empty { text-align: center; padding: 2.5rem; color: var(--muted); font-size: 0.85rem; }
+
+        .loading-row td { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; }
+
+        @media (max-width: 700px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .topbar { padding: 0 1rem; }
+            .main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN
+════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">
+            <span class="icon">
+            <img src="assets/im2.jpeg" style="width: 130px; height: 130px; border-radius: 100px;">
+
+            </span>
+            <h1>Centinela</h1>
+            <p>Panel de Administración · Privada La Condesa</p>
+        </div>
+
+        <div class="login-error" id="loginError">Correo o contraseña incorrectos.</div>
+
+        <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="text" id="inputEmail" placeholder="carolinaserranotoom@gmail.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="inputPass" placeholder="••••••••" autocomplete="off">
+        </div>
+        <button class="btn-login" id="btnLogin">Ingresar al panel</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANEL
+════════════════════════════════════════════════════ -->
+<div id="adminPanel">
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span>            <img src="assets/im2.jpeg" style="width: 50px; height: 50px; border-radius: 100px;">
+</span> Centinela Admin
+        </div>
+        <div class="topbar-right">
+            <span class="admin-badge" id="adminEmail">carolina</span>
+            <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="page-header">
+            <h2>Registro de vecinos</h2>
+            <p id="fechaHoy"></p>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+            <a href="admin_encuestas.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,200,150,0.12);border:1px solid rgba(0,200,150,0.25);color:var(--accent);padding:10px 16px;border-radius:12px;text-decoration:none;font-size:0.9rem;font-weight:600;">
+                <span>🗳️</span> Panel de encuestas
+            </a>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Total vecinos</div>
+                <div class="stat-val" id="s-total">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Con ubicación GPS</div>
+                <div class="stat-val" id="s-geo">—</div>
+                <div class="stat-pill pill-info" id="s-geo-pct"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Consentimiento</div>
+                <div class="stat-val" id="s-consent">—</div>
+                <div class="stat-pill pill-ok" id="s-consent-pct"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Usuarios activos</div>
+                <div class="stat-val" id="s-activos">—</div>
+                <div class="stat-pill pill-warn" id="s-activos-pct"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input class="ctrl-input" type="text" id="buscar" placeholder="Buscar por nombre, casa o email..." oninput="filtrar()">
+            <select class="ctrl-select" id="filtroGeo" onchange="filtrar()">
+                <option value="">Todas las ubicaciones</option>
+                <option value="con">Con GPS</option>
+                <option value="sin">Sin GPS</option>
+            </select>
+            <select class="ctrl-select" id="filtroConsent" onchange="filtrar()">
+                <option value="">Todos los consentimientos</option>
+                <option value="si">Aceptó</option>
+                <option value="no">Rechazó</option>
+            </select>
+            <button class="btn-refresh" onclick="cargar()">↻ Actualizar</button>
+        </div>
+
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vecino</th>
+                        <th>Casa</th>
+                        <th>Edad</th>
+                        <th>Registro</th>
+                        <th>GPS</th>
+                        <th>Consentimiento</th>
+                        <th>Dirección</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr class="loading-row"><td colspan="7">Cargando vecinos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="map-section">
+            <div class="map-header">
+                <h3>Mapa de ubicaciones de registro</h3>
+                <span class="map-count" id="mapCount"></span>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <div class="map-section">
+            <div class="map-header">
+                <h3>Publicaciones pendientes de aprobación</h3>
+                <span class="map-count" id="pendingPostsCount">0 pendientes</span>
+            </div>
+            <div id="pending-posts-list" class="p-4">
+                <div class="empty">Cargando publicaciones pendientes...</div>
+            </div>
+        </div>
+
+        <div class="map-section">
+            <div class="map-header">
+                <h3>Notificaciones del administrador</h3>
+                <span class="map-count" id="adminNotifCount">0 sin leer</span>
+            </div>
+            <div id="admin-notifications-list" class="p-4">
+                <div class="empty">Cargando notificaciones...</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ── Credenciales de administrador ────────────────────────────────────────────
+const ADMIN_EMAIL    = 'carolinaserranotoom@gmail.com';
+const ADMIN_PASSWORD = 'admin123';
+const ADMIN_TOKEN    = 'centinela-admin-2025';
+const runtime = window.CentinelaRuntime;
+const API_URL        = runtime ? runtime.serviceUrl(8000) : 'http://localhost:8000';
+
+let todos = [];
+let mapa  = null;
+let markers = [];
+
+// ── Login ────────────────────────────────────────────────────────────────────
+function intentarLogin() {
+    const email = document.getElementById('inputEmail').value.trim().toLowerCase();
+    const pass  = document.getElementById('inputPass').value;
+    const errDiv = document.getElementById('loginError');
+
+    if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+        sessionStorage.setItem('centinela_admin', '1');
+        sessionStorage.setItem('adminEmail', ADMIN_EMAIL);
+        localStorage.setItem('rolActual', 'admin');
+        errDiv.style.display = 'none';
+        mostrarPanel();
+    } else {
+        errDiv.style.display = 'block';
+        document.getElementById('inputPass').value = '';
+        document.getElementById('inputPass').focus();
+    }
+}
+
+function mostrarPanel() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display  = 'block';
+    document.getElementById('adminEmail').textContent = ADMIN_EMAIL;
+    document.getElementById('fechaHoy').textContent =
+        'Hoy · ' + new Date().toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    cargar();
+}
+
+function cerrarSesion() {
+    sessionStorage.removeItem('centinela_admin');
+    sessionStorage.removeItem('adminEmail');
+    if (localStorage.getItem('rolActual') === 'admin') {
+        localStorage.removeItem('rolActual');
+    }
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display  = 'none';
+    document.getElementById('inputEmail').value = '';
+    document.getElementById('inputPass').value  = '';
+}
+
+// Eventos de login
+document.getElementById('btnLogin').addEventListener('click', intentarLogin);
+document.getElementById('btnLogout').addEventListener('click', cerrarSesion);
+document.getElementById('inputPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') intentarLogin();
+});
+document.getElementById('inputEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('inputPass').focus();
+});
+
+// Restaurar sesión si ya estaba logueada
+if (sessionStorage.getItem('centinela_admin') === '1') mostrarPanel();
+
+// ── Datos ────────────────────────────────────────────────────────────────────
+async function cargar() {
+    document.getElementById('tbody').innerHTML =
+        '<tr class="loading-row"><td colspan="7">Cargando vecinos...</td></tr>';
+
+    try {
+        const r = await fetch(`${API_URL}/api/admin/usuarios/`);
+        if (!r.ok) throw new Error('Error ' + r.status);
+        todos = await r.json();
+    } catch (e) {
+        todos = [];
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="empty">No se pudieron cargar los vecinos reales.</td></tr>';
+    }
+
+    actualizarStats();
+    filtrar();
+    iniciarMapa();
+}
+
+function actualizarStats() {
+    const total    = todos.length;
+    const conGeo   = todos.filter(u => u.reg_latitude).length;
+    const consent  = todos.filter(u => u.data_consent).length;
+    const activos  = todos.filter(u => u.activo).length;
+    const pct = n => total ? Math.round(n / total * 100) + '%' : '0%';
+
+    document.getElementById('s-total').textContent       = total;
+    document.getElementById('s-geo').textContent          = conGeo;
+    document.getElementById('s-geo-pct').textContent      = pct(conGeo);
+    document.getElementById('s-consent').textContent      = consent;
+    document.getElementById('s-consent-pct').textContent  = pct(consent);
+    document.getElementById('s-activos').textContent      = activos;
+    document.getElementById('s-activos-pct').textContent  = pct(activos);
+}
+
+function filtrar() {
+    const q       = document.getElementById('buscar').value.toLowerCase();
+    const geo     = document.getElementById('filtroGeo').value;
+    const consent = document.getElementById('filtroConsent').value;
+
+    const lista = todos.filter(u => {
+        const mq = !q || u.nombre_completo.toLowerCase().includes(q)
+                       || u.casa.toLowerCase().includes(q)
+                       || u.email.toLowerCase().includes(q);
+        const mg = !geo || (geo === 'con' ? !!u.reg_latitude : !u.reg_latitude);
+        const mc = !consent || (consent === 'si' ? u.data_consent : !u.data_consent);
+        return mq && mg && mc;
+    });
+
+    renderTabla(lista);
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+function iniciales(nombre) {
+    return nombre.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
+}
+
+function fmtFecha(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function renderTabla(lista) {
+    const tb = document.getElementById('tbody');
+    if (!lista.length) {
+        tb.innerHTML = '<tr><td colspan="7" class="empty">Sin resultados para este filtro</td></tr>';
+        return;
+    }
+    tb.innerHTML = lista.map(u => `
+        <tr>
+            <td>
+                <div class="name-cell">
+                    <span class="avatar">${iniciales(u.nombre_completo)}</span>
+                    <div class="name-info">
+                        <span>${u.nombre_completo}</span>
+                        <span class="email">${u.email}</span>
+                    </div>
+                </div>
+            </td>
+            <td class="mono">${u.casa}</td>
+            <td>${u.edad}</td>
+            <td>${fmtFecha(u.fecha_registro)}</td>
+            <td>
+                ${u.reg_latitude
+                    ? `<span class="badge pill-ok"><span class="dot" style="background:#00c896"></span>${u.reg_latitude.toFixed(4)}</span>`
+                    : `<span class="badge pill-danger"><span class="dot" style="background:#ef4444"></span>Sin GPS</span>`}
+            </td>
+            <td>
+                ${u.data_consent
+                    ? `<span class="badge pill-ok">Aceptó</span>`
+                    : `<span class="badge pill-warn">Rechazó</span>`}
+            </td>
+            <td class="addr" title="${u.reg_address || ''}">${u.reg_address || '—'}</td>
+        </tr>`).join('');
+}
+
+// ── Mapa ──────────────────────────────────────────────────────────────────────
+function iniciarMapa() {
+    if (!mapa) {
+        mapa = L.map('map').setView([19.285, -99.655], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(mapa);
+    }
+
+    markers.forEach(m => m.remove());
+    markers = [];
+
+    const conUbi = todos.filter(u => u.reg_latitude && u.reg_longitude);
+    document.getElementById('mapCount').textContent = conUbi.length + ' ubicaciones registradas';
+
+    conUbi.forEach(u => {
+        const m = L.circleMarker([u.reg_latitude, u.reg_longitude], {
+            radius: 9,
+            fillColor: '#00c896',
+            color: '#00a67d',
+            weight: 2,
+            fillOpacity: 0.9
+        }).bindPopup(`
+            <strong>${u.nombre_completo}</strong><br>
+            ${u.casa}<br>
+            <small style="color:#9ca3af">${u.reg_address || ''}</small>
+        `).addTo(mapa);
+        markers.push(m);
+    });
+
+    if (conUbi.length > 0) {
+        mapa.fitBounds(conUbi.map(u => [u.reg_latitude, u.reg_longitude]), { padding: [40, 40] });
+    }
+}
+</script>
+<script src="js/admin-moderacion.js?v=20260331-media-v2"></script>
+</body>
+</html>

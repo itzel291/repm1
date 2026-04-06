@@ -1,0 +1,38 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Variables de entorno
+.env
+.env.*
+*.env
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/

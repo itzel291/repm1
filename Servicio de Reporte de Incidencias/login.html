@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <title>Login - Centinela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 h-screen flex items-center justify-center font-sans">
+    
+    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-96 border border-slate-700">
+        <div class="flex items-center gap-3 mb-8 justify-center">
+            <span class="text-yellow-400 text-4xl">🛡️</span>
+            <span class="font-bold text-3xl text-white tracking-wide">Centinela</span>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-slate-400 text-sm mb-2">Tu Nombre</label>
+                <input type="text" id="nombreUsuario" placeholder="Ej. Jorge M." class="w-full bg-slate-700 text-white rounded-lg p-3 border-none focus:ring-2 focus:ring-yellow-400">
+            </div>
+
+            <div>
+                <label class="block text-slate-400 text-sm mb-2">Selecciona un Rol de Prueba</label>
+                <select id="rolUsuario" class="w-full bg-slate-700 text-white rounded-lg p-3 border-none focus:ring-2 focus:ring-yellow-400">
+                    <option value="usuario">Usuario Estándar</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+
+            <button onclick="iniciarSesion()" class="w-full bg-yellow-400 text-slate-900 font-bold rounded-lg p-3 mt-4 hover:bg-yellow-300 transition-colors">
+                Ingresar al Sistema
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function iniciarSesion() {
+            const nombre = document.getElementById('nombreUsuario').value;
+            const rol = document.getElementById('rolUsuario').value;
+
+            if(!nombre) return alert("Por favor ingresa un nombre");
+
+            // Guardamos los datos en la memoria del navegador
+            localStorage.setItem('usuarioActual', nombre);
+            localStorage.setItem('rolActual', rol);
+
+            // Redirigimos al dashboard
+            window.location.href = 'Interfaz.html';
+        }
+    </script>
+</body>
+</html>

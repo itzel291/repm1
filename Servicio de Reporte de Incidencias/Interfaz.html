@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Centinela - Dashboard</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: "#FACC15", "background-light": "#F1F5F9", "background-dark": "#0F172A", "surface-light": "#FFFFFF", "surface-dark": "#1E293B", "sidebar-dark": "#020617" } } } };
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="Interfaz.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 h-screen overflow-hidden flex font-sans transition-colors duration-200">
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/80 z-[50] hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-[60] transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-sidebar-dark text-white flex flex-col justify-between shrink-0 border-r border-slate-800 h-full">
+        <div>
+            <div class="h-20 flex items-center justify-between px-6 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span class="material-icons-round text-primary text-4xl">local_police</span>
+                    <span class="font-bold text-2xl tracking-wide text-white">Centinela</span>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><span class="material-icons-round text-2xl">close</span></button>
+            </div>
+            <nav class="mt-8 px-4 space-y-2">
+                <a class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors font-medium" href="inicio.html"><span class="material-icons-round">home</span> Resumen</a>
+                <a class="flex items-center gap-4 px-4 py-3 bg-primary/10 text-primary rounded-xl font-medium" href="Interfaz.html"><span class="material-icons-round">campaign</span> Panel de Control</a>
+            </nav>
+        </div>
+        <div id="perfilContenedor" class="p-6 border-t border-slate-800 relative select-none">
+            <div class="flex items-center gap-3 text-slate-400 hover:text-white cursor-pointer transition-colors" onclick="toggleMenuSesion()">
+                <div id="displayInicialUser" class="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-white font-bold text-lg shrink-0">?</div>
+                <div class="flex flex-col min-w-0">
+                    <span id="displayNombreUser" class="text-sm font-semibold text-white truncate">Cargando...</span>
+                    <span id="displayRolUser" class="text-xs text-slate-500 truncate">...</span>
+                </div>
+            </div>
+            <div id="menuSesion" class="hidden absolute bottom-20 left-6 bg-slate-800 border border-slate-700 rounded-lg shadow-xl w-48 overflow-hidden z-[70] transition-all origin-bottom-left">
+                <button onclick="cerrarSesion()" class="w-full text-left px-4 py-3 text-red-400 hover:bg-slate-700 hover:text-red-300 transition-colors flex items-center gap-3"><span class="material-icons-round text-sm">logout</span> <span class="font-medium text-sm">Cerrar Sesión</span></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        <header class="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 shrink-0 z-20">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"><span class="material-icons-round text-2xl">menu</span></button>
+                <h1 class="text-xl font-bold dark:text-white truncate">Panel de Control</h1>
+            </div>
+            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0" id="theme-toggle"><span class="material-icons-round text-2xl">contrast</span></button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+            <div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-8">
+                <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                    <h2 class="text-base md:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"><span class="material-icons-round text-red-500">map</span> <span class="hidden sm:inline">Mapa de Incidencias Activas</span><span class="sm:hidden">Mapa General</span></h2>
+                    <button onclick="centrarMapaPrincipalEnUsuario()" class="flex items-center gap-1 text-sm bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 transition-colors shadow-sm"><span class="material-icons-round text-sm">my_location</span> <span class="hidden sm:inline">Centrar en Mí</span></button>
+                </div>
+                <div id="mapa-principal" class="w-full h-48 md:h-80 z-0 relative"></div>
+            </div>
+
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-4">Incidencias Recientes</h2>
+            <div id="contenedor-incidencias" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div class="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 group cursor-pointer" onclick="abrirModal()">
+            <div class="relative w-14 h-14 md:w-16 md:h-16 bg-red-600 rounded-full shadow-2xl flex items-center justify-center hover:bg-red-500 transition-colors"><span class="material-icons-round text-white text-3xl">add</span></div>
+        </div>
+    </main>
+
+    <div id="modalRegistro" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-xl transition-all w-full sm:max-w-xl border border-slate-200 dark:border-slate-700">
+                    <div class="bg-white dark:bg-slate-800 px-6 pb-4 pt-6">
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">Nueva Incidencia</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 flex items-center gap-1 font-medium"><span class="material-icons-round text-sm">account_circle</span><span id="modalNombreUsuario">Usuario</span></p>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha</label>
+                                    <input type="date" id="fecha" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Hora</label>
+                                    <input type="time" id="hora" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nivel de Importancia</label>
+                                <select id="prioridad" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white">
+                                    <option value="Baja">🟢 Baja (Incidente menor)</option>
+                                    <option value="Media">🟡 Media (Requiere atención)</option>
+                                    <option value="Crítica">🔴 Crítica (Emergencia / Alta prioridad)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción<span class="text-red-500 font-bold">*</span></label>
+                                <textarea id="descripcion" rows="3" placeholder="Describe los hechos..." class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Ubicación<span class="text-red-500 font-bold">*</span></label>
+                                <div id="mapa-osm" class="w-full h-40 md:h-56 rounded-lg border border-slate-300 dark:border-slate-600 z-0"></div>
+                                <input type="hidden" id="latitud"><input type="hidden" id="longitud">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fotos (Puedes seleccionar varias)</label>
+                                <input type="file" id="fotoInput" accept="image/*" multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-red-50 file:text-red-600 hover:file:bg-red-100 cursor-pointer"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex gap-3 justify-end">
+                        <button type="button" onclick="cerrarModal()" class="px-5 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 transition-colors">Cancelar</button>
+                        <button id="btnRegistrar" type="button" onclick="reportar_incidencia()" class="px-5 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-500 transition-colors">Registrar Incidencia</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDetalles" class="fixed inset-0 z-[110] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md" onclick="cerrarModalDetalles()"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-2xl transition-all w-full sm:max-w-2xl border border-slate-200 dark:border-slate-700">
+                    
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span id="detPrioridadBadge" class="px-3 py-1 text-xs font-bold rounded-md uppercase tracking-wide">Prioridad</span>
+                                <span id="detEstadoBadge" class="px-3 py-1 text-xs font-bold rounded-md uppercase bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">Estado</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                Reporte #<span id="detId"></span>
+                            </h3>
+                        </div>
+                        <button onclick="cerrarModalDetalles()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-slate-700 p-2 rounded-full transition-colors"><span class="material-icons-round">close</span></button>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Oficial</p><p id="detUser" class="font-medium text-slate-800 dark:text-slate-200"></p></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Fecha</p><p id="detFecha" class="font-medium text-slate-800 dark:text-slate-200"></p></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Hora</p><p id="detHora" class="font-medium text-slate-800 dark:text-slate-200"></p></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Ubicación</p><p id="detCalle" class="font-medium text-blue-600 dark:text-blue-400 truncate"></p></div>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-slate-500 uppercase font-bold mb-2">Descripción de los Hechos</p>
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed" id="detDesc"></div>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><span class="material-icons-round text-lg">photo_library</span> Evidencia Fotográfica</p>
+                            <div id="detGaleria" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="SDRI.js"></script>
+</body>
+</html>

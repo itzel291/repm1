@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Flotante</title>
+    <script src="session-bridge.js"></script>
+    <style>
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            height: 450px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            font-family: sans-serif;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            touch-action: none;
+        }
+        .chat-widget.closed {
+            height: 48px;
+            width: 48px;
+            border-radius: 50%;
+            background: #1877f2;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .chat-widget.closed .chat-header span,
+        .chat-widget.closed .chat-body,
+        .chat-widget.closed .chat-footer { display: none; }
+        .chat-widget.closed .chat-header { height: 48px; background: transparent; }
+        .chat-widget.closed .toggle-btn::before { content: "💬"; font-size: 24px; color: white; }
+        .chat-header {
+            background: #1877f2;
+            color: white;
+            padding: 12px;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .chat-header span { font-weight: bold; }
+        .toggle-btn { font-size: 18px; font-weight: bold; background: none; border: none; color: white; cursor: pointer; }
+        .chat-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .user-list { width: 100%; background: #f0f2f5; overflow-y: auto; padding: 8px; }
+        .user-item { padding: 10px; margin: 4px 0; background: white; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        .user-item:hover { background: #e4e6e9; }
+        .chat-panel { flex: 1; display: flex; flex-direction: column; height: 100%; }
+        .chat-header-panel { display: flex; align-items: center; padding: 8px 12px; background: #f0f2f5; border-bottom: 1px solid #ddd; }
+        .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 12px; padding: 0; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+        .back-btn:hover { background: #e4e6e9; }
+        .chat-title { font-weight: bold; flex: 1; }
+        .messages-container { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 18px; word-wrap: break-word; }
+        .message.outgoing { align-self: flex-end; background: #1877f2; color: white; border-bottom-right-radius: 4px; }
+        .message.incoming { align-self: flex-start; background: #e4e6e9; color: black; border-bottom-left-radius: 4px; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; background: white; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 20px; margin-right: 8px; outline: none; }
+        .chat-footer button { background: #1877f2; border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
+        .chat-footer button:disabled { background: #9bb7d4; cursor: not-allowed; }
+        .status-text { font-size: 12px; color: #666; text-align: center; margin-top: 8px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="chat-widget closed" id="chatWidget">
+    <div class="chat-header" id="chatHeader">
+        <span>Chat Vecinos</span>
+        <button class="toggle-btn" id="toggleChat">▼</button>
+    </div>
+    <div class="chat-body">
+        <div id="userListView" class="user-list">
+            <div class="status-text">Conectando...</div>
+        </div>
+        <div id="chatPanelView" class="chat-panel hidden">
+            <div class="chat-header-panel">
+                <button class="back-btn" id="backToList">←</button>
+                <span class="chat-title" id="chatWith">Usuario</span>
+            </div>
+            <div class="messages-container" id="messagesContainer"></div>
+            <div class="chat-footer">
+                <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+                <button id="sendBtn">Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Configuración ──────────────────────────────────────
+    const API_BASE = "http://localhost:5003"
+
+    // Tomar token y nombre del localStorage de Centinela
+    const token = localStorage.getItem('token')
+    const currentUser = localStorage.getItem('usuarioActual')
+
+    if (!token || !currentUser) {
+        console.warn("No hay sesión activa de Centinela")
+    }
+
+    // Estado
+    let ws = null
+    let connected = false
+    let usersList = []
+    let currentChatWith = null
+    let messagesHistory = {}
+
+    // DOM
+    const widget = document.getElementById('chatWidget')
+    const toggleBtn = document.getElementById('toggleChat')
+    const userListView = document.getElementById('userListView')
+    const chatPanelView = document.getElementById('chatPanelView')
+    const backToListBtn = document.getElementById('backToList')
+    const chatWithSpan = document.getElementById('chatWith')
+    const messagesContainer = document.getElementById('messagesContainer')
+    const messageInput = document.getElementById('messageInput')
+    const sendBtn = document.getElementById('sendBtn')
+
+    function makeFloatingDraggable(element, handle = element) {
+        if (!element || !handle) return
+
+        let isDragging = false
+        let moved = false
+        let startX = 0
+        let startY = 0
+        let initialLeft = 0
+        let initialTop = 0
+        let activePointerId = null
+
+        const onPointerMove = (event) => {
+            if (!isDragging) return
+
+            const nextLeft = initialLeft + (event.clientX - startX)
+            const nextTop = initialTop + (event.clientY - startY)
+            const maxLeft = Math.max(window.innerWidth - element.offsetWidth, 0)
+            const maxTop = Math.max(window.innerHeight - element.offsetHeight, 0)
+
+            if (Math.abs(event.clientX - startX) > 3 || Math.abs(event.clientY - startY) > 3) {
+                moved = true
+            }
+
+            element.style.left = `${Math.min(Math.max(nextLeft, 0), maxLeft)}px`
+            element.style.top = `${Math.min(Math.max(nextTop, 0), maxTop)}px`
+            element.style.right = 'auto'
+            element.style.bottom = 'auto'
+        }
+
+        const stopDragging = () => {
+            if (!isDragging) return
+            isDragging = false
+            handle.releasePointerCapture?.(activePointerId)
+            window.removeEventListener('pointermove', onPointerMove)
+            window.removeEventListener('pointerup', stopDragging)
+            window.removeEventListener('pointercancel', stopDragging)
+        }
+
+        handle.addEventListener('pointerdown', (event) => {
+            if (event.button !== 0) return
+            if (event.target.closest('button') && event.target !== handle) return
+
+            const rect = element.getBoundingClientRect()
+            isDragging = true
+            moved = false
+            activePointerId = event.pointerId
+            startX = event.clientX
+            startY = event.clientY
+            initialLeft = rect.left
+            initialTop = rect.top
+            element.style.left = `${rect.left}px`
+            element.style.top = `${rect.top}px`
+            element.style.right = 'auto'
+            element.style.bottom = 'auto'
+
+            handle.setPointerCapture?.(activePointerId)
+            window.addEventListener('pointermove', onPointerMove)
+            window.addEventListener('pointerup', stopDragging)
+            window.addEventListener('pointercancel', stopDragging)
+        })
+
+        handle.addEventListener('click', (event) => {
+            if (!moved) return
+            event.preventDefault()
+            event.stopPropagation()
+            moved = false
+        }, true)
+    }
+
+    makeFloatingDraggable(widget, document.getElementById('chatHeader'))
+
+    ;[
+        '#panicButton',
+        '#botonPanico',
+        '#boton-panico',
+        '.panic-button',
+        '.boton-panico',
+        '[data-role="panic-button"]'
+    ].forEach((selector) => {
+        const panicButton = document.querySelector(selector)
+        if (panicButton) makeFloatingDraggable(panicButton)
+    })
+
+    // ── Funciones UI ───────────────────────────────────────
+    function updateUserList() {
+        if (usersList.length === 0) {
+            userListView.innerHTML = '<div class="status-text">No hay otros vecinos conectados</div>'
+            return
+        }
+        userListView.innerHTML = ''
+        usersList.forEach(user => {
+            if (user === currentUser) return
+            const div = document.createElement('div')
+            div.className = 'user-item'
+            div.textContent = user
+            div.onclick = () => openChatWith(user)
+            userListView.appendChild(div)
+        })
+    }
+
+    function openChatWith(userId) {
+        currentChatWith = userId
+        document.getElementById('userListView').classList.add('hidden')
+        chatPanelView.classList.remove('hidden')
+        chatWithSpan.textContent = userId
+        renderMessages(userId)
+        messageInput.focus()
+    }
+
+    function backToList() {
+        currentChatWith = null
+        chatPanelView.classList.add('hidden')
+        document.getElementById('userListView').classList.remove('hidden')
+    }
+
+    function renderMessages(withUser) {
+        const msgs = messagesHistory[withUser] || []
+        messagesContainer.innerHTML = ''
+        msgs.forEach(msg => {
+            const msgDiv = document.createElement('div')
+            msgDiv.className = `message ${msg.from === currentUser ? 'outgoing' : 'incoming'}`
+            msgDiv.textContent = msg.content
+            messagesContainer.appendChild(msgDiv)
+        })
+        messagesContainer.scrollTop = messagesContainer.scrollHeight
+    }
+
+    function addMessageToHistory(from, to, content) {
+        const other = (from === currentUser) ? to : from
+        if (!messagesHistory[other]) messagesHistory[other] = []
+        messagesHistory[other].push({ from, content, timestamp: new Date().toISOString() })
+        if (currentChatWith === other) renderMessages(other)
+    }
+
+    // ── WebSocket con token ────────────────────────────────
+    function connectWebSocket() {
+        if (!token) {
+            userListView.innerHTML = '<div class="status-text" style="color:red">Sin sesión activa</div>'
+            return
+        }
+
+        // El token va como query param: /ws/nombre?token=abc123
+        ws = new WebSocket(`ws://localhost:5003/ws/${encodeURIComponent(currentUser)}?token=${token}`)
+
+        ws.onopen = () => {
+            connected = true
+            fetchUsers()
+        }
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data)
+
+                if (data.type === "system") {
+                    if (data.action === "user_joined" && data.user !== currentUser) {
+                        if (!usersList.includes(data.user)) {
+                            usersList.push(data.user)
+                            updateUserList()
+                        }
+                    } else if (data.action === "user_left") {
+                        usersList = usersList.filter(u => u !== data.user)
+                        updateUserList()
+                        if (currentChatWith === data.user) backToList()
+                    }
+                } else if (data.type === "private") {
+                    if (data.from !== currentUser) {
+                        addMessageToHistory(data.from, currentUser, data.content)
+                    }
+                }
+            } catch (e) {
+                console.error("Error parseando mensaje:", e)
+            }
+        }
+
+        ws.onclose = () => {
+            connected = false
+            userListView.innerHTML = '<div class="status-text">Reconectando...</div>'
+            setTimeout(connectWebSocket, 3000)
+        }
+
+        ws.onerror = (err) => console.error("WebSocket error:", err)
+    }
+
+    async function fetchUsers() {
+        try {
+            const resp = await fetch(`${API_BASE}/users`)
+            const data = await resp.json()
+            usersList = data.users.filter(u => u !== currentUser)
+            updateUserList()
+        } catch (err) {
+            console.error("Error obteniendo usuarios:", err)
+        }
+    }
+
+    function sendPrivateMessage(to, content) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            alert("No estás conectado al chat")
+            return false
+        }
+        ws.send(JSON.stringify({ type: "private", to, content, timestamp: new Date().toISOString() }))
+        addMessageToHistory(currentUser, to, content)
+        return true
+    }
+
+    // ── Eventos ────────────────────────────────────────────
+    toggleBtn.addEventListener('click', () => {
+        widget.classList.toggle('closed')
+        if (!widget.classList.contains('closed') && !connected) {
+            connectWebSocket()
+        }
+    })
+
+    backToListBtn.addEventListener('click', backToList)
+
+    sendBtn.addEventListener('click', () => {
+        if (!currentChatWith) return
+        const content = messageInput.value.trim()
+        if (!content) return
+        if (sendPrivateMessage(currentChatWith, content)) {
+            messageInput.value = ""
+        }
+    })
+
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.shiftKey) return
+        e.preventDefault()
+        sendBtn.click()
+    })
+
+    setInterval(() => { if (connected) fetchUsers() }, 10000)
+</script>
+</body>
+</html>
+

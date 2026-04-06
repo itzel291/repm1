@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centinela - Registro</title>
+    <script src="js/session-bridge.js"></script>
+    <script src="js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="css/ui-shell.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos críticos del modal inline — no dependen del caché de styles.css */
+        #geoPrivacyModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .geo-modal-box {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .geo-modal-header {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 1.25rem 1.5rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .geo-modal-header h2 { font-size: 1rem; margin: 0; }
+        .geo-modal-icon { font-size: 1.75rem; }
+        .geo-modal-body { padding: 1.25rem 1.5rem; font-size: 0.88rem; color: #333; }
+        .geo-modal-body p { margin-bottom: 0.75rem; line-height: 1.55; }
+        .geo-modal-section { margin-bottom: 1rem; }
+        .geo-modal-section h3 { font-size: 0.78rem; text-transform: uppercase; color: #1a1a2e; margin-bottom: 0.35rem; }
+        .geo-modal-section ul { padding-left: 1.1rem; margin: 0; }
+        .geo-modal-section ul li { margin-bottom: 0.2rem; }
+        .geo-modal-warning {
+            background: #fff8e1;
+            border-left: 4px solid #f59e0b;
+            padding: 0.6rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            color: #7c4a00;
+            margin-top: 0.75rem;
+        }
+        .geo-modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem 1.25rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        .geo-btn {
+            flex: 1; padding: 0.7rem; border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer;
+        }
+        .geo-btn-primary  { background: #FDB913; color: #000; }
+        .geo-btn-primary:hover { background: #F89C0E; }
+        .geo-btn-secondary { background: #f0f0f0; color: #555; border: 2px solid #ddd; }
+        .privacy-banner {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: #1a1a2e; color: #e0e0e0;
+            font-size: 0.78rem; padding: 0.45rem 1.25rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            z-index: 1000; flex-wrap: wrap;
+        }
+        .privacy-banner a { color: #00BCD4; font-weight: 600; text-decoration: none; }
+        .geo-status {
+            padding: 0.6rem 1rem; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 1rem; display: none;
+        }
+        .geo-status-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .geo-status-error   { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+        .geo-status-warning { background: #fff8e1; color: #7c4a00; border-left: 4px solid #f59e0b; }
+        .location-readonly  { background: #f0f4ff !important; border-color: #b8c7f7 !important; color: #3c4b8a !important; font-size: 0.82rem !important; }
+        .geo-required-note  { text-align: center; font-size: 0.78rem; color: #999; margin-top: 0.4rem; }
+        body { padding-top: 2.2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Modal de privacidad (visible por defecto, geo.js lo cierra al resolver) ── -->
+    <div id="geoPrivacyModal" class="geo-modal-overlay" style="display:flex;">
+        <div class="geo-modal-box" role="dialog" aria-modal="true" aria-labelledby="geoModalTitle">
+            <div class="geo-modal-header">
+                <span class="geo-modal-icon">📍</span>
+                <h2 id="geoModalTitle">Aviso de Recopilación de Datos de Ubicación</h2>
+            </div>
+            <div class="geo-modal-body">
+                <p class="geo-modal-intro">
+                    Antes de continuar, necesitamos informarte sobre el uso de tu ubicación
+                    conforme a la <strong>Ley Federal de Protección de Datos Personales
+                    en Posesión de los Particulares (LFPDPPP)</strong>.
+                </p>
+                <div class="geo-modal-section">
+                    <h3>¿Qué datos recopilamos?</h3>
+                    <ul>
+                        <li>Coordenadas GPS exactas (latitud y longitud) al momento del registro.</li>
+                        <li>Dirección aproximada derivada de tus coordenadas.</li>
+                        <li>Ubicación en cada inicio de sesión.</li>
+                        <li>Actualizaciones de posición mientras usas la plataforma.</li>
+                    </ul>
+                </div>
+                <div class="geo-modal-section">
+                    <h3>¿Para qué los usamos?</h3>
+                    <ul>
+                        <li>Seguridad y prevención de fraudes.</li>
+                        <li>Control de acceso y verificación de residencia.</li>
+                        <li>Detección de accesos sospechosos desde ubicaciones inusuales.</li>
+                    </ul>
+                </div>
+                <div class="geo-modal-section">
+                    <h3>¿Cuánto tiempo los almacenamos?</h3>
+                    <p>Los datos se conservan durante la vigencia de tu cuenta y hasta 2 años
+                       después de su cancelación. Solo el administrador tiene acceso.</p>
+                </div>
+                <div class="geo-modal-section">
+                    <h3>Tus derechos (ARCO)</h3>
+                    <p>Puedes acceder, rectificar, cancelar u oponerte al tratamiento de tus datos
+                       en cualquier momento desde la configuración de tu perfil.</p>
+                </div>
+                <p class="geo-modal-warning">
+                    📍 La ubicación GPS es <strong>opcional</strong>. Puedes continuar el registro sin ella.
+                </p>
+            </div>
+            <div class="geo-modal-footer">
+                <button id="geoModalRechazar" class="geo-btn geo-btn-secondary">Rechazar</button>
+                <button id="geoModalAceptar" class="geo-btn geo-btn-primary">Acepto y continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner de aviso de privacidad (persistente) -->
+    <div class="privacy-banner">
+        <span class="privacy-banner-icon">🔒</span>
+        <span>
+            Este servicio recopila y procesa datos de ubicación en tiempo real.
+            Tus datos están protegidos conforme a la LFPDPPP.
+        </span>
+        <a href="#" class="privacy-banner-link" title="Ver aviso de privacidad completo">Más información</a>
+    </div>
+
+    <div class="container">
+        <div class="auth-card">
+            <!-- Logo -->
+            <div class="logo-container">
+                <div style="font-size: 80px;">
+                                            <img src="assets/im2.jpeg" style="width: 120px; height: 120px; border-radius: 130px;">
+
+                </div>
+                <h1 class="logo-title">Centinela</h1>
+                <p class="logo-subtitle">Registro de Nuevo Vecino</p>
+            </div>
+
+            <!-- Indicador de estado de geolocalización -->
+            <div id="geoStatus" class="geo-status" style="display:none;"></div>
+
+            <!-- Formulario de registro -->
+            <form id="registroForm">
+                <div class="form-group">
+                    <label for="nombre_completo">Nombre Completo</label>
+                    <input
+                        type="text"
+                        id="nombre_completo"
+                        placeholder="Ej: Juan Pérez García"
+                        required
+                        minlength="3"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_casa">
+                        Número de Vivienda
+                    </label>
+                    <input
+                        type="text"
+                        id="numero_casa"
+                        placeholder="Ej: Casa 25"
+                        required
+                    >
+                    <small class="form-help">Debe estar registrada en el padrón oficial</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="edad">Edad</label>
+                    <input
+                        type="number"
+                        id="edad"
+                        placeholder="Ej: 35"
+                        required
+                        min="18"
+                        max="120"
+                    >
+                    <small class="form-help warning" id="edad-info"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="ejemplo@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Mínimo 6 caracteres"
+                        required
+                        minlength="6"
+                    >
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Confirmar Contraseña</label>
+                    <input
+                        type="password"
+                        id="password_confirm"
+                        placeholder="Repite tu contraseña"
+                        required
+                    >
+                </div>
+
+                <!-- Campo de ubicación (informativo, solo lectura) -->
+                <div class="form-group location-field-group">
+                    <label>
+                        Ubicación de Registro
+                        <span class="info-tooltip" title="Se registra tu ubicación GPS al momento de crear tu cuenta para verificar que resides en la privada. Dato protegido bajo LFPDPPP.">ⓘ</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="locationDisplay"
+                        placeholder="Ubicación no disponible (opcional)"
+                        readonly
+                        class="location-readonly"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btnRegistro">
+                    Registrarme
+                </button>
+
+                <p class="geo-required-note">
+                    📍 La ubicación GPS es opcional.
+                </p>
+            </form>
+
+            <!-- Mensaje de respuesta -->
+            <div id="mensaje" class="mensaje"></div>
+
+            <!-- Link a login -->
+            <div class="footer-link">
+                <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- geo.js debe cargarse antes que registro.js -->
+    <script src="js/geo.js"></script>
+    <script src="js/registro.js"></script>
+
+    <script>
+        // Respaldo inline: si geo.js no cargó, los botones del modal aún funcionan
+        if (!window.Geo) {
+            console.warn('[inline] geo.js no disponible — usando respaldo inline');
+            document.getElementById('geoModalAceptar').addEventListener('click', function () {
+                document.getElementById('geoPrivacyModal').style.display = 'none';
+                document.getElementById('btnRegistro').disabled = false;
+                var st = document.getElementById('geoStatus');
+                st.textContent = '⚠️ Ubicación no disponible (geo.js no cargó)';
+                st.className = 'geo-status geo-status-warning';
+                st.style.display = 'block';
+            });
+            document.getElementById('geoModalRechazar').addEventListener('click', function () {
+                document.getElementById('geoPrivacyModal').style.display = 'none';
+                var st = document.getElementById('geoStatus');
+                st.textContent = '📍 Ubicación no disponible (opcional)';
+                st.className = 'geo-status geo-status-warning';
+                st.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
+
+

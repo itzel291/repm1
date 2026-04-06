@@ -1,0 +1,74 @@
+<script>
+const API = "http://127.0.0.1:5000";
+const viviendaGlobal = prompt("Ingrese su ID de vivienda para verificar votos");
+
+async function cargar() {
+    const res = await fetch(`${API}/consultas/`);
+    const xml = new DOMParser().parseFromString(await res.text(), "text/xml");
+
+    const cont = document.getElementById("encuestas");
+
+    for (const c of xml.querySelectorAll("consulta")) {
+        const div = document.createElement("div");
+        div.innerHTML = `<h2>${c.querySelector("titulo").textContent}</h2>`;
+
+        for (const p of c.querySelectorAll("pregunta")) {
+            const pid = p.querySelector("id").textContent;
+            const preguntaDiv = document.createElement("div");
+            preguntaDiv.innerHTML = `<h4>${p.querySelector("texto").textContent}</h4>`;
+
+            // 🔎 Verificar si ya votó
+            const estadoRes = await fetch(`${API}/votos/verificar/${pid}`, {
+                headers: { "X-Vivienda-ID": viviendaGlobal }
+            });
+            const estadoXML = new DOMParser().parseFromString(await estadoRes.text(), "text/xml");
+            const yaVoto = estadoXML.querySelector("estado").textContent === "ya_voto";
+
+            for (const o of p.querySelectorAll("opcion")) {
+                const oid = o.querySelector("id").textContent;
+                const btn = document.createElement("button");
+                btn.textContent = o.querySelector("texto").textContent;
+
+                if (yaVoto) {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                } else {
+                    btn.onclick = () => votar(pid, oid);
+                }
+
+                preguntaDiv.appendChild(btn);
+            }
+
+            if (yaVoto) {
+                preguntaDiv.innerHTML += "<p style='color:red;'>Ya votó en esta pregunta</p>";
+            }
+
+            div.appendChild(preguntaDiv);
+        }
+
+        cont.appendChild(div);
+    }
+}
+
+async function votar(preguntaId, opcionId) {
+    const user = prompt("ID Usuario");
+
+    const xml = `<voto><pregunta_id>${preguntaId}</pregunta_id><opcion_id>${opcionId}</opcion_id></voto>`;
+
+    const res = await fetch(`${API}/votos/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/xml",
+            "X-User-ID": user,
+            "X-Vivienda-ID": viviendaGlobal
+        },
+        body: xml
+    });
+
+    alert(await res.text());
+    location.reload(); // recargar para bloquear botones
+}
+
+cargar();
+</script>
+<div id="encuestas"></div>

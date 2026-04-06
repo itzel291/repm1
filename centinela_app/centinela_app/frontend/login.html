@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Login - Centinela</title>
+
+<script src="session-bridge.js"></script>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<h1>Iniciar Sesión</h1>
+
+<input id="usuario" placeholder="Usuario">
+<input id="password" type="password" placeholder="Contraseña">
+
+<button onclick="login()">Entrar</button>
+
+<p id="mensaje"></p>
+
+<script>
+
+async function login(){
+
+let usuario = document.getElementById("usuario").value
+let password = document.getElementById("password").value
+
+let xml = `
+<loginRequest>
+<usuario>${usuario}</usuario>
+<password>${password}</password>
+</loginRequest>
+`
+
+let response = await fetch("http://localhost:5000/auth/login",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/xml"
+},
+
+body: xml
+
+})
+
+let text = await response.text()
+
+let parser = new DOMParser()
+
+let xmlDoc = parser.parseFromString(text,"text/xml")
+
+let estado = xmlDoc.getElementsByTagName("estado")[0].textContent
+let mensaje = xmlDoc.getElementsByTagName("mensaje")[0].textContent
+
+document.getElementById("mensaje").innerText = mensaje
+
+if(estado === "OK"){
+
+window.location.href = "index.html"
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>
+

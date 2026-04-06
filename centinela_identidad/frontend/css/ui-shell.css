@@ -1,0 +1,304 @@
+:root {
+    --app-font-scale: 1;
+    --app-page-zoom: 1;
+}
+
+html {
+    font-size: calc(16px * var(--app-font-scale));
+}
+
+html.light {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+body {
+    min-height: 100vh;
+}
+
+html.light body {
+    background: #eef3f2 !important;
+    color: #0d2b27 !important;
+}
+
+html.light aside {
+    background: #e2eeec !important;
+    border-color: #bdd0cd !important;
+}
+
+html.light header {
+    background: #f8fafa !important;
+    border-color: #bdd0cd !important;
+}
+
+html.light .bg-sidebar {
+    background: #e2eeec !important;
+}
+
+html.light .bg-surface-darker {
+    background: #f8fafa !important;
+}
+
+html.light .bg-surface-dark {
+    background: #ffffff !important;
+}
+
+html.light .border-border-dark {
+    border-color: #bdd0cd !important;
+}
+
+html.light .text-white {
+    color: #0d2b27 !important;
+}
+
+html.light .text-text-muted {
+    color: #4d8078 !important;
+}
+
+html.light .nav-item:hover {
+    background: rgba(13, 242, 204, 0.12) !important;
+    color: #0d7a64 !important;
+}
+
+html.light .nav-item.active {
+    background: rgba(13, 242, 204, 0.2) !important;
+    color: #0d7a64 !important;
+}
+
+html.light .nav-item.active .nav-icon,
+html.light .nav-item.active .material-icons-round {
+    color: #0d7a64 !important;
+}
+
+html.light .hover\:bg-surface-dark:hover {
+    background: #eef3f2 !important;
+}
+
+html.light .hover\:text-white:hover {
+    color: #0d2b27 !important;
+}
+
+html.light .hover\:border-primary\/30:hover,
+html.light .hover\:border-primary\/40:hover,
+html.light .focus\:border-primary\/50:focus {
+    border-color: rgba(13, 122, 100, 0.45) !important;
+}
+
+html.light input,
+html.light textarea,
+html.light select {
+    color: #0d2b27 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+    color: #6f908a !important;
+}
+
+html.light button,
+html.light .card-hover,
+html.light .settings-card,
+html.light article,
+html.light section > div,
+html.light .rounded-2xl,
+html.light .rounded-3xl {
+    box-shadow: none;
+}
+
+html.light .bg-primary\/10 {
+    background-color: rgba(13, 242, 204, 0.12) !important;
+}
+
+html.light .bg-primary\/20 {
+    background-color: rgba(13, 242, 204, 0.18) !important;
+}
+
+html.light .text-bg-dark {
+    color: #0d1c19 !important;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+    background: #bdd0cd;
+}
+
+.app-mobile-menu-btn,
+.app-sidebar-overlay {
+    display: none;
+}
+
+.app-mobile-menu-btn {
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(13, 242, 204, 0.16);
+    background: rgba(21, 35, 33, 0.9);
+    color: #0df2cc;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.app-mobile-menu-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(13, 242, 204, 0.4);
+}
+
+.app-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: rgba(6, 12, 10, 0.62);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+    z-index: 25;
+}
+
+.app-mobile-header-start {
+    display: none;
+}
+
+body[data-page="configuracion"] .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+body[data-page="configuracion"] .settings-card {
+    min-height: 100%;
+}
+
+body[data-page="configuracion"] input[type="range"] {
+    width: 100%;
+    accent-color: #0df2cc;
+}
+
+@media (max-width: 1024px) {
+    .app-mobile-menu-btn,
+    .app-sidebar-overlay,
+    .app-mobile-header-start {
+        display: inline-flex;
+    }
+
+    body {
+        height: auto !important;
+        overflow: auto !important;
+        position: relative;
+    }
+
+    body > aside {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(20rem, 84vw) !important;
+        max-width: 20rem;
+        transform: translateX(-104%);
+        transition: transform 0.24s ease;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        z-index: 35;
+    }
+
+    body.mobile-nav-open > aside {
+        transform: translateX(0);
+    }
+
+    body.mobile-nav-open .app-sidebar-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body > div.flex-1 {
+        width: 100%;
+        min-width: 0;
+    }
+
+    body > div.flex-1 > header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        gap: 0.75rem;
+        min-height: 4.75rem;
+    }
+
+    body > div.flex-1 .p-8,
+    body > div.flex-1 .px-8 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    body > div.flex-1 .p-8 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    body > div.flex-1 .grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body > div.flex-1 .grid-cols-3,
+    body > div.flex-1 .md\:grid-cols-3,
+    body > div.flex-1 .md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    body > div.flex-1 .flex.items-center.justify-between {
+        gap: 0.75rem;
+    }
+
+    body > div.flex-1 .hidden.md\:block {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    body > div.flex-1 > header {
+        flex-wrap: wrap;
+        align-items: center;
+        height: auto !important;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    body > div.flex-1 .px-8.pt-5,
+    body > div.flex-1 .px-8.pb-8 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    body > div.flex-1 .flex.items-end.gap-6,
+    body > div.flex-1 .flex.items-center.justify-between.mb-4 {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    body > div.flex-1 .grid.grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    body > div.flex-1 .w-56 {
+        width: 100% !important;
+    }
+
+    body > div.flex-1 .relative.w-full.h-64 {
+        height: 16rem !important;
+    }
+
+    body > div.flex-1 .fixed.bottom-8.right-8 {
+        right: 1rem !important;
+        bottom: 1rem !important;
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+    }
+
+    body > div.flex-1 .fixed.bottom-8.right-8 span:first-child {
+        font-size: 1.35rem !important;
+    }
+
+    body[data-page="configuracion"] .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}

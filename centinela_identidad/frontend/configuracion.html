@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela - Configuracion</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444'
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+<style>
+* { font-family:'Outfit',sans-serif; }
+body { background:#0D1C19; }
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1E3330;border-radius:99px}
+.nav-item{transition:all .2s ease}
+.nav-item:hover{background:rgba(13,242,204,.06);color:#0DF2CC}
+.nav-item.active{background:rgba(13,242,204,.12);color:#0DF2CC}
+.settings-chip{border:1px solid rgba(13,242,204,.18);background:rgba(13,242,204,.06)}
+</style>
+</head>
+<body data-page="configuracion" class="h-screen overflow-hidden flex text-white">
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">home</span>Inicio</a>
+    <a href="avisos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">campaign</span>Avisos</a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">article</span>Publicaciones</a>
+    <a href="eventos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">event</span>Eventos</a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">chat_bubble_outline</span>Mensajes</a>
+    <a href="notificaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">notifications_none</span>Notificaciones</a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">newspaper</span>Noticias</a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">history</span>Historial</a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">person_outline</span>Perfil</a>
+    <div class="pt-4 pb-2"><p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administracion</p></div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+  </nav>
+  <div class="p-4 border-t border-border-dark">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-dark cursor-pointer transition-colors" onclick="location.href='perfil.html'">
+      <div class="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm" id="user-initial">C</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white truncate" id="user-name">Cargando...</p>
+        <p class="text-xs text-text-muted truncate" id="user-casa">Casa</p>
+      </div>
+      <button onclick="cerrarSesion(event)" class="text-text-muted hover:text-sos transition-colors"><span class="material-icons-round text-base">logout</span></button>
+    </div>
+  </div>
+</aside>
+
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Configuracion</h2>
+      <p class="text-text-muted text-sm">Personaliza tema, lectura y escala general de la interfaz.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="settings-chip text-xs font-semibold px-3 py-1 rounded-full text-primary">Cambios inmediatos</span>
+      <button onclick="toggleTheme()" class="p-2 rounded-xl bg-surface-dark border border-border-dark hover:border-primary/30 transition-colors">
+        <span class="material-icons-round text-text-muted text-xl" id="theme-icon">light_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8 space-y-6">
+    <section class="settings-grid">
+      <article class="settings-card bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <span class="material-icons-round text-primary">palette</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Tema general</h3>
+            <p class="text-sm text-text-muted">Alterna entre modo claro y oscuro en toda la app.</p>
+          </div>
+        </div>
+        <label class="text-xs uppercase tracking-widest text-text-muted font-semibold block mb-2">Tema</label>
+        <select id="theme-select" class="w-full bg-surface-darker border border-border-dark rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50">
+          <option value="dark">Oscuro</option>
+          <option value="light">Claro</option>
+        </select>
+      </article>
+
+      <article class="settings-card bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <span class="material-icons-round text-primary">format_size</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Tamañoo de letra</h3>
+            <p class="text-sm text-text-muted">Ajusta el tamaño base para mejorar legibilidad.</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mb-3">
+          <label class="text-xs uppercase tracking-widest text-text-muted font-semibold">Escala tipografica</label>
+          <span id="font-scale-value" class="text-primary text-sm font-bold">100%</span>
+        </div>
+        <input id="font-scale" type="range" min="0.9" max="1.3" step="0.05" value="1">
+      </article>
+
+      <article class="settings-card bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <span class="material-icons-round text-primary">zoom_in</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Zoom de interfaz</h3>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mb-3">
+          <label class="text-xs uppercase tracking-widest text-text-muted font-semibold">Zoom</label>
+          <span id="zoom-scale-value" class="text-primary text-sm font-bold">100%</span>
+        </div>
+        <input id="zoom-scale" type="range" min="0.9" max="1.15" step="0.05" value="1">
+      </article>
+
+      <article class="settings-card bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <span class="material-icons-round text-primary">mic</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Asistente por voz</h3>
+            <p class="text-sm text-text-muted">Activa comandos tipo "Centinela, dime si tengo notificaciones".</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div id="voice-assistant-toggle-row" class="flex items-center justify-between gap-4 rounded-2xl border border-border-dark bg-surface-darker px-4 py-3 cursor-pointer">
+            <div>
+              <p class="text-sm font-semibold text-white">Activar asistente</p>
+              <p class="text-xs text-text-muted">Usa voz cuando el navegador lo soporte o modo compatible por texto.</p>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input id="voice-assistant-enabled" type="checkbox" class="sr-only peer">
+              <span id="voice-toggle-track" class="relative w-12 h-7 rounded-full bg-border-dark transition-colors pointer-events-none">
+                <span id="voice-toggle-thumb" class="absolute top-1 left-1 h-5 w-5 rounded-full bg-white transition-transform"></span>
+              </span>
+            </label>
+          </div>
+          <div class="rounded-2xl border border-border-dark bg-surface-darker p-4">
+            <p class="text-xs uppercase tracking-widest text-text-muted mb-2">Comandos disponibles</p>
+            <div class="space-y-2 text-sm text-text-muted">
+              <p>"Centinela, dime si tengo notificaciones"</p>
+              <p>"Centinela, dime si tengo encuestas pendientes"</p>
+              <p>"Centinela, leeme lo que aparece en esta pantalla"</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button id="voice-test-button" class="px-4 py-2 rounded-2xl bg-primary text-bg-dark font-semibold hover:bg-primary-dim transition-colors">
+              Probar voz
+            </button>
+            <button id="voice-command-button" class="px-4 py-2 rounded-2xl border border-border-dark text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+              Escribir comando
+            </button>
+            <button id="voice-read-screen-button" class="px-4 py-2 rounded-2xl border border-border-dark text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+              Leer esta pantalla
+            </button>
+          </div>
+          <p id="voice-assistant-status" class="text-xs text-text-muted">El asistente esta desactivado.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="bg-surface-dark border border-border-dark rounded-3xl p-6">
+      <div class="flex items-center justify-between gap-4 mb-5">
+        <div>
+          <h3 class="text-lg font-bold text-white">Vista previa</h3>
+          <p class="text-sm text-text-muted">Asi se sentira la interfaz con tus preferencias actuales.</p>
+        </div>
+        <button id="reset-preferences" class="px-4 py-2 rounded-2xl border border-border-dark text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+          Restablecer
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-surface-darker border border-border-dark rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-widest text-text-muted mb-2">Lectura</p>
+          <h4 class="text-white font-bold mb-2">Titulo de ejemplo</h4>
+          <p class="text-text-muted text-sm">Esta tarjeta te permite revisar si el contraste y el tamano del texto son comodos para uso diario.</p>
+        </div>
+        <div class="bg-surface-darker border border-border-dark rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-widest text-text-muted mb-2">Controles</p>
+          <button class="w-full bg-primary text-bg-dark font-bold py-3 rounded-2xl mb-3">Boton principal</button>
+          <button class="w-full border border-border-dark text-text-muted py-3 rounded-2xl">Boton secundario</button>
+        </div>
+        <div class="bg-surface-darker border border-border-dark rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-widest text-text-muted mb-2">Pantalla chica</p>
+          <p class="text-text-muted text-sm">En celular veras el sidebar como menu flotante, tarjetas apiladas y espaciado compacto.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || localStorage.getItem('nombre') || 'Vecino'
+const casa = localStorage.getItem('numeroCasa') || ''
+
+const runtime = window.CentinelaRuntime
+const LOGIN_URL = runtime ? runtime.appUrl('login.html') : 'http://localhost:3000/login.html'
+if (!token) location.href = LOGIN_URL
+
+document.getElementById('user-name').textContent = nombre
+document.getElementById('user-casa').textContent = casa || 'Centinela'
+document.getElementById('user-initial').textContent = nombre.charAt(0).toUpperCase()
+
+function cerrarSesion(e) {
+  e.stopPropagation()
+  localStorage.clear()
+  location.href = LOGIN_URL
+}
+</script>
+</body>
+</html>

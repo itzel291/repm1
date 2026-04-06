@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centinela - Iniciar Sesión</title>
+    <script src="js/session-bridge.js"></script>
+    <script src="js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="css/ui-shell.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Banner de aviso de privacidad (persistente) -->
+    <div class="privacy-banner">
+        <span class="privacy-banner-icon">🔒</span>
+        <span>
+            Este servicio recopila y procesa datos de ubicación en tiempo real.
+            Tus datos están protegidos conforme a la LFPDPPP.
+        </span>
+        <a href="#" class="privacy-banner-link" title="Ver aviso de privacidad completo">Más información</a>
+    </div>
+
+    <div class="container">
+        <div class="auth-card">
+            <!-- Logo -->
+            <div class="logo-container">
+                <div style="font-size: 80px;">
+                        <img src="assets/im2.jpeg" style="width: 120px; height: 120px; border-radius: 130px;">
+                </div>
+                <h1 class="logo-title">Iniciar sesión</h1>
+                <p class="logo-subtitle">¿Es tu primera vez? <a href="registro.html" style="color: #00BCD4;">Regístrate</a></p>
+            </div>
+
+            <!-- Aviso de rastreo de ubicación en login -->
+            <div class="login-location-notice">
+                <span>📍</span>
+                <span>
+                    Tu ubicación será registrada al iniciar sesión para verificar accesos.
+                    <span class="info-tooltip" title="Se captura tu posición GPS en cada intento de login (exitoso o fallido) como medida de seguridad y detección de fraudes. Dato protegido bajo LFPDPPP.">ⓘ</span>
+                </span>
+            </div>
+
+            <!-- Formulario de login -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Correo electrónico*</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="ejemplo@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña*</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="••••••••"
+                        required
+                    >
+                </div>
+
+                <div class="text-center" style="margin-bottom: 1rem;">
+                    <a href="recuperar-password.html" class="btn-link">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btnLogin">
+                    Iniciar sesión
+                </button>
+            </form>
+
+            <!-- Mensaje de respuesta -->
+            <div id="mensaje" class="mensaje"></div>
+
+            <!-- Link a registro -->
+            <div class="footer-link">
+                <p>¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- geo.js debe cargarse antes que login.js -->
+    <script src="js/geo.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>
+

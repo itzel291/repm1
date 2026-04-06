@@ -1,0 +1,347 @@
+<!-- Asistente Centinela — widget autocontenido -->
+<style>
+  #centinela-fab {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 9999;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  #centinela-fab-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #152321;
+    border: 2px solid #0DF2CC;
+    cursor: pointer;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(13,242,204,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  #centinela-fab-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 28px rgba(13,242,204,0.5);
+  }
+  #centinela-panel {
+    display: none;
+    position: fixed;
+    bottom: 6.5rem;
+    left: 2rem;
+    width: 380px;
+    height: 520px;
+    background: #0D1C19;
+    border: 1px solid #1E3330;
+    border-radius: 16px;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    z-index: 9998;
+  }
+  #centinela-panel.open { display: flex; }
+  #centinela-header {
+    background: #152321;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #1E3330;
+    flex-shrink: 0;
+  }
+  #centinela-header .title {
+    flex: 1;
+    color: #0DF2CC;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  #centinela-header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #6B9E96;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  #centinela-header button:hover { color: #0DF2CC; }
+  #centinela-suggestions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    background: #0D1C19;
+    border-bottom: 1px solid #1E3330;
+    flex-shrink: 0;
+  }
+  #centinela-suggestions button {
+    background: #152321;
+    border: 1px solid #1E3330;
+    color: #6B9E96;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  #centinela-suggestions button:hover {
+    border-color: #0DF2CC;
+    color: #0DF2CC;
+  }
+  #centinela-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #1E3330 transparent;
+  }
+  .c-msg {
+    max-width: 80%;
+    padding: 9px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .c-msg.user {
+    align-self: flex-end;
+    background: #0DF2CC;
+    color: #0D1C19;
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+  }
+  .c-msg.bot {
+    align-self: flex-start;
+    background: #152321;
+    color: #d0ece8;
+    border: 1px solid #1E3330;
+    border-bottom-left-radius: 4px;
+  }
+  .c-msg.typing { color: #6B9E96; font-style: italic; }
+  #centinela-footer {
+    padding: 10px;
+    background: #152321;
+    border-top: 1px solid #1E3330;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  #centinela-input {
+    flex: 1;
+    background: #0D1C19;
+    border: 1px solid #1E3330;
+    border-radius: 24px;
+    padding: 8px 14px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #centinela-input:focus { border-color: #0DF2CC; }
+  #centinela-input::placeholder { color: #6B9E96; }
+  .c-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .c-icon-btn:hover { transform: scale(1.1); }
+  #centinela-send { background: #0DF2CC; color: #0D1C19; }
+  #centinela-mic { background: #1E3330; color: #0DF2CC; }
+  #centinela-mic.recording { background: #3a1010; color: #ff6b6b; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  #centinela-sos-alert {
+    display: none;
+    background: #3a1010;
+    border: 2px solid #ff4444;
+    color: #ff8888;
+    padding: 10px 14px;
+    margin: 8px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    flex-shrink: 0;
+  }
+</style>
+
+<div id="centinela-fab">
+  <button id="centinela-fab-btn" title="Asistente Centinela">🤖</button>
+
+  <div id="centinela-panel">
+    <div id="centinela-header">
+      <span>🤖</span>
+      <span class="title">Asistente Centinela</span>
+      <button id="centinela-tts-btn" title="Silenciar voz">🔊</button>
+      <button id="centinela-close-btn" title="Cerrar">✕</button>
+    </div>
+
+    <div id="centinela-suggestions">
+      <button onclick="centinelaEnviar('¿Cómo reporto una incidencia?')">¿Cómo reporto?</button>
+      <button onclick="centinelaEnviar('Quiero activar una emergencia')">Activar emergencia</button>
+      <button onclick="centinelaEnviar('¿Qué incidencias hubo hoy?')">¿Qué pasó hoy?</button>
+      <button onclick="centinelaEnviar('Necesito ayuda con el sistema')">Ayuda</button>
+    </div>
+
+    <div id="centinela-sos-alert">🚨 EMERGENCIA DETECTADA — Redirigiendo...</div>
+
+    <div id="centinela-messages"></div>
+
+    <div id="centinela-footer">
+      <input id="centinela-input" type="text" placeholder="Escribe tu mensaje..." maxlength="500" />
+      <button class="c-icon-btn" id="centinela-mic" title="Micrófono">🎤</button>
+      <button class="c-icon-btn" id="centinela-send" title="Enviar">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const API_URL = 'http://10.0.35.195:8000/api/ia/chat/';
+  let ttsActivo = true;
+  let micActivo = false;
+  let recognition = null;
+  let typingEl = null;
+
+  // --- DOM refs ---
+  const fab = document.getElementById('centinela-fab-btn');
+  const panel = document.getElementById('centinela-panel');
+  const closeBtn = document.getElementById('centinela-close-btn');
+  const ttsBtn = document.getElementById('centinela-tts-btn');
+  const input = document.getElementById('centinela-input');
+  const sendBtn = document.getElementById('centinela-send');
+  const micBtn = document.getElementById('centinela-mic');
+  const messages = document.getElementById('centinela-messages');
+  const sosAlert = document.getElementById('centinela-sos-alert');
+
+  // --- Toggle panel ---
+  fab.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open') && messages.children.length === 0) {
+      agregarMensaje('bot', 'Hola, soy el asistente de Centinela. ¿En qué te puedo ayudar?');
+    }
+  });
+  closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+
+  // --- TTS toggle ---
+  ttsBtn.addEventListener('click', () => {
+    ttsActivo = !ttsActivo;
+    ttsBtn.textContent = ttsActivo ? '🔊' : '🔇';
+    if (!ttsActivo) speechSynthesis.cancel();
+  });
+
+  // --- Agregar mensaje al chat ---
+  function agregarMensaje(tipo, texto) {
+    const div = document.createElement('div');
+    div.className = `c-msg ${tipo}`;
+    div.textContent = texto;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function mostrarTyping() {
+    typingEl = agregarMensaje('bot typing', 'Escribiendo...');
+  }
+  function quitarTyping() {
+    if (typingEl) { typingEl.remove(); typingEl = null; }
+  }
+
+  // --- TTS ---
+  function hablar(texto) {
+    if (!ttsActivo) return;
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(texto);
+    utt.lang = 'es-MX';
+    utt.rate = 1.0;
+    speechSynthesis.speak(utt);
+  }
+
+  // --- Enviar mensaje ---
+  async function centinelaEnviar(textoForzado) {
+    const texto = (textoForzado || input.value).trim();
+    if (!texto) return;
+    input.value = '';
+    agregarMensaje('user', texto);
+    mostrarTyping();
+
+    try {
+      const token = localStorage.getItem('token') || '';
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Token ${token}` } : {}),
+        },
+        body: JSON.stringify({ mensaje: texto }),
+      });
+
+      const data = await res.json();
+      quitarTyping();
+
+      if (data.activar_sos) {
+        sosAlert.style.display = 'block';
+        agregarMensaje('bot', data.respuesta);
+        hablar('Emergencia detectada. Activando protocolo SOS.');
+        setTimeout(() => { window.location.href = 'panico.html'; }, 2500);
+        return;
+      }
+
+      const respuesta = data.respuesta || data.error || 'Sin respuesta del servidor.';
+      agregarMensaje('bot', respuesta);
+      hablar(respuesta);
+
+    } catch (e) {
+      quitarTyping();
+      agregarMensaje('bot', 'No se pudo conectar con el asistente. Verifica que el backend esté corriendo.');
+    }
+  }
+
+  // Exponer para los botones de sugerencias
+  window.centinelaEnviar = centinelaEnviar;
+
+  // --- Enter para enviar ---
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') centinelaEnviar(); });
+  sendBtn.addEventListener('click', () => centinelaEnviar());
+
+  // --- Micrófono ---
+  micBtn.addEventListener('click', () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+    if (micActivo) {
+      recognition && recognition.stop();
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = 'es-MX';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => { micActivo = true; micBtn.classList.add('recording'); };
+    recognition.onend = () => { micActivo = false; micBtn.classList.remove('recording'); };
+    recognition.onresult = e => {
+      const transcript = e.results[0][0].transcript;
+      input.value = transcript;
+    };
+    recognition.onerror = () => { micActivo = false; micBtn.classList.remove('recording'); };
+    recognition.start();
+  });
+})();
+</script>

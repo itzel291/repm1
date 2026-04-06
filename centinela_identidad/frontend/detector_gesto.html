@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Detector de Gesto SOS — Centinela</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0D1C19; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+
+  header {
+    background: #152321;
+    border-bottom: 1px solid #1E3330;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .btn-back {
+    background: #1E3330;
+    border: none;
+    color: #0DF2CC;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .btn-back:hover { background: #0DF2CC22; }
+
+  .main-title { font-size: 20px; font-weight: 700; color: #0DF2CC; }
+  .subtitle { font-size: 13px; color: #6B9E96; margin-top: 2px; }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    gap: 20px;
+  }
+
+  .instructions {
+    background: #152321;
+    border: 1px solid #1E3330;
+    border-radius: 12px;
+    padding: 14px 20px;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    color: #6B9E96;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .instructions strong { color: #0DF2CC; }
+
+  .video-container {
+    position: relative;
+    width: 560px;
+    max-width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid #1E3330;
+    background: #000;
+  }
+  #video {
+    width: 100%;
+    display: block;
+    transform: scaleX(-1);
+  }
+  #canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+  }
+
+  #estado {
+    font-size: 22px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border-radius: 12px;
+    background: #152321;
+    border: 2px solid #1E3330;
+    color: #6B9E96;
+    text-align: center;
+    max-width: 560px;
+    width: 100%;
+    transition: all 0.3s;
+  }
+  #estado.detectando {
+    border-color: #f0c040;
+    color: #f0c040;
+    background: #1a1800;
+  }
+  #estado.activando {
+    border-color: #ff4444;
+    color: #ff4444;
+    background: #1a0000;
+    animation: parpadeo 0.5s infinite;
+  }
+  @keyframes parpadeo { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .progress-container {
+    max-width: 560px;
+    width: 100%;
+    display: none;
+  }
+  .progress-container.visible { display: block; }
+  .progress-label {
+    font-size: 12px;
+    color: #6B9E96;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .progress-bar-bg {
+    background: #1E3330;
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #0DF2CC, #f0c040);
+    transition: width 0.1s linear;
+  }
+
+  #btn-cancelar {
+    display: none;
+    background: #3a1010;
+    border: 1px solid #ff4444;
+    color: #ff8888;
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  #btn-cancelar:hover { background: #550000; }
+  #btn-cancelar.visible { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="btn-back" onclick="history.back()">← Volver</button>
+  <div>
+    <div class="main-title">🤟 Detector de Señal de Auxilio</div>
+    <div class="subtitle">Detección automática del gesto SOS mediante visión por computadora</div>
+  </div>
+</header>
+
+<main>
+  <div class="instructions">
+    <strong>Cómo hacer el gesto SOS:</strong><br/>
+    1. Abre la mano completamente 🖐️<br/>
+    2. Mete el pulgar hacia adentro ✊<br/>
+    3. Cierra los 4 dedos sobre el pulgar<br/>
+    Mantén el puño cerrado por <strong>2 segundos</strong> para activar la alerta.
+  </div>
+
+  <div class="video-container">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div id="estado">🔍 Buscando gesto...</div>
+
+  <div class="progress-container" id="progress-container">
+    <div class="progress-label">Manteniendo gesto... activará en 2 segundos</div>
+    <div class="progress-bar-bg">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+
+  <button id="btn-cancelar" onclick="cancelarSOS()">Cancelar — fue un accidente</button>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+<script>
+const API_URL = 'http://10.0.35.195:8000/api/ia/chat/';
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const estadoEl = document.getElementById('estado');
+const progressContainer = document.getElementById('progress-container');
+const progressBar = document.getElementById('progress-bar');
+const btnCancelar = document.getElementById('btn-cancelar');
+
+let gestureStartTime = null;
+let sosActivado = false;
+const DURACION_SOS = 2000; // 2 segundos
+
+function cancelarSOS() {
+  gestureStartTime = null;
+  sosActivado = false;
+  progressBar.style.width = '0%';
+  progressContainer.classList.remove('visible');
+  btnCancelar.classList.remove('visible');
+  estadoEl.className = '';
+  estadoEl.textContent = '🔍 Buscando gesto...';
+}
+
+function distancia(a, b) {
+  return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+}
+
+function detectarGestoSOS(landmarks) {
+  // Pulgar doblado: punta (4) más cerca de la base (0) que la articulación (2)
+  const pulgDoblado = distancia(landmarks[4], landmarks[0]) < distancia(landmarks[2], landmarks[0]);
+
+  // Dedos cerrados: punta debajo de articulación media (en coordenadas normalizadas, mayor Y = más abajo)
+  const indiceCerrado = landmarks[8].y > landmarks[6].y;
+  const medioCerrado  = landmarks[12].y > landmarks[10].y;
+  const anularCerrado = landmarks[16].y > landmarks[14].y;
+  const meniCerrado   = landmarks[20].y > landmarks[18].y;
+
+  return pulgDoblado && indiceCerrado && medioCerrado && anularCerrado && meniCerrado;
+}
+
+async function activarSOS() {
+  if (sosActivado) return;
+  sosActivado = true;
+
+  estadoEl.className = 'activando';
+  estadoEl.textContent = '🚨 ACTIVANDO SOS';
+  btnCancelar.classList.remove('visible');
+
+  try {
+    const token = localStorage.getItem('token') || '';
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Token ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        mensaje: 'SEÑAL DE AUXILIO DETECTADA por reconocimiento de gesto - activar protocolo de emergencia',
+      }),
+    });
+  } catch (e) {
+    console.error('Error al notificar SOS:', e);
+  }
+
+  setTimeout(() => { window.location.href = 'panico.html'; }, 1500);
+}
+
+// Inicializar MediaPipe Hands
+const hands = new Hands({
+  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`,
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.5,
+});
+
+hands.onResults(results => {
+  // Ajustar canvas al video
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    // Sin mano detectada
+    if (!sosActivado) {
+      gestureStartTime = null;
+      progressBar.style.width = '0%';
+      progressContainer.classList.remove('visible');
+      btnCancelar.classList.remove('visible');
+      estadoEl.className = '';
+      estadoEl.textContent = '🔍 Buscando gesto...';
+    }
+    return;
+  }
+
+  const landmarks = results.multiHandLandmarks[0];
+
+  // Dibujar landmarks
+  drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#0DF2CC', lineWidth: 2 });
+  drawLandmarks(ctx, landmarks, { color: '#fff', lineWidth: 1, radius: 3 });
+
+  if (sosActivado) return;
+
+  const gestoDetectado = detectarGestoSOS(landmarks);
+
+  if (gestoDetectado) {
+    if (!gestureStartTime) {
+      gestureStartTime = Date.now();
+      estadoEl.className = 'detectando';
+      estadoEl.textContent = '✋ Gesto detectado — mantén 2s';
+      progressContainer.classList.add('visible');
+      btnCancelar.classList.add('visible');
+    }
+
+    const transcurrido = Date.now() - gestureStartTime;
+    const progreso = Math.min((transcurrido / DURACION_SOS) * 100, 100);
+    progressBar.style.width = progreso + '%';
+
+    if (transcurrido >= DURACION_SOS) {
+      activarSOS();
+    }
+  } else {
+    // Gesto perdido — resetear
+    gestureStartTime = null;
+    progressBar.style.width = '0%';
+    progressContainer.classList.remove('visible');
+    btnCancelar.classList.remove('visible');
+    estadoEl.className = '';
+    estadoEl.textContent = '🔍 Buscando gesto...';
+  }
+});
+
+// Iniciar cámara
+const camera = new Camera(video, {
+  onFrame: async () => { await hands.send({ image: video }); },
+  width: 640,
+  height: 480,
+});
+camera.start();
+</script>
+</body>
+</html>

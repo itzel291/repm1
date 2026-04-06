@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela — Notificaciones</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444',
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+<style>
+* { font-family:'Outfit',sans-serif; }
+body { background:#0D1C19; }
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1E3330;border-radius:99px}
+@keyframes sos-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}
+.sos-pulse{animation:sos-pulse 2s infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s ease forwards}
+.nav-item{transition:all .2s ease}
+.nav-item:hover{background:rgba(13,242,204,.06);color:#0DF2CC}
+.nav-item.active{background:rgba(13,242,204,.12);color:#0DF2CC}
+.notif-item{transition:all .2s ease}
+.notif-item:hover{background:rgba(13,242,204,.04)}
+</style>
+</head>
+<body class="h-screen overflow-hidden flex text-white">
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">home</span>Inicio</a>
+    <a href="avisos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">campaign</span>Avisos</a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">article</span>Publicaciones</a>
+    <a href="eventos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">event</span>Eventos</a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">chat_bubble_outline</span>Mensajes</a>
+    <a href="notificaciones.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><span class="material-icons-round text-xl">notifications_none</span>Notificaciones<span class="ml-auto bg-primary text-bg-dark text-xs font-bold px-1.5 py-0.5 rounded-full" id="badge-count">5</span></a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">newspaper</span>Noticias</a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">history</span>Historial</a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">person_outline</span>Perfil</a>
+    <div class="pt-4 pb-2"><p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administración</p></div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+  </nav>
+  <div class="p-4 border-t border-border-dark">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-dark cursor-pointer transition-colors" onclick="location.href='perfil.html'">
+      <div class="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm" id="user-initial">M</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white truncate" id="user-name">Vecino</p>
+        <p class="text-xs text-text-muted truncate" id="user-casa">Casa</p>
+      </div>
+      <button onclick="cerrarSesion(event)" class="text-text-muted hover:text-sos transition-colors"><span class="material-icons-round text-base">logout</span></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Notificaciones</h2>
+      <p class="text-text-muted text-sm" id="notif-count">Cargando...</p>
+    </div>
+    <button onclick="marcarTodas()" class="text-primary text-sm font-semibold hover:text-primary-dim transition-colors">
+      Marcar todas como leídas
+    </button>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8 max-w-3xl mx-auto w-full">
+    <div id="notif-list" class="space-y-3"></div>
+  </div>
+</div>
+
+<!-- SOS -->
+<button onclick="location.href='panico.html'" class="sos-pulse fixed bottom-8 right-8 z-50 w-16 h-16 bg-sos rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform border-4 border-red-400">
+  <span class="material-icons-round text-white text-2xl">emergency</span>
+  <span class="text-white text-[9px] font-black uppercase tracking-wider">SOS</span>
+</button>
+
+<script id="legacy-notificaciones-script" type="text/plain">
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || 'Vecino'
+const casa = localStorage.getItem('numeroCasa') || ''
+
+const runtime = window.CentinelaRuntime
+const LOGIN_URL = runtime ? runtime.appUrl('login.html') : 'http://localhost:3000/login.html'
+if (!token) location.href = LOGIN_URL
+
+document.getElementById('user-name').textContent = nombre
+document.getElementById('user-casa').textContent = casa || 'Centinela'
+document.getElementById('user-initial').textContent = nombre.charAt(0).toUpperCase()
+
+function cerrarSesion(e) { e.stopPropagation(); localStorage.clear(); location.href = LOGIN_URL }
+
+// Notificaciones generadas dinámicamente desde los servicios
+const notificaciones = [
+  { tipo: 'sos', icono: 'warning', color: 'text-sos', bg: 'bg-sos/10 border-sos/20', titulo: 'Alerta de emergencia activa', desc: 'Se reportó un incidente crítico en la comunidad. Revisa la sección de Avisos.', tiempo: 'Hace 5 min', leida: false, link: 'avisos.html' },
+  { tipo: 'post', icono: 'article', color: 'text-primary', bg: 'bg-primary/10 border-primary/20', titulo: 'Nueva publicación en el Tablón', desc: 'MULAN publicó: "Reunión vecinal el próximo sábado a las 10am"', tiempo: 'Hace 20 min', leida: false, link: 'publicaciones.html' },
+  { tipo: 'like', icono: 'favorite', color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/20', titulo: 'Le gustó tu publicación', desc: 'A Juan le gustó tu aviso sobre la limpieza comunitaria.', tiempo: 'Hace 1 hora', leida: false, link: 'publicaciones.html' },
+  { tipo: 'comment', icono: 'chat_bubble', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', titulo: 'Comentaron tu publicación', desc: 'Ana comentó: "¡Excelente iniciativa! Ahí estaremos 👍"', tiempo: 'Hace 2 horas', leida: false, link: 'publicaciones.html' },
+  { tipo: 'incidencia', icono: 'campaign', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20', titulo: 'Nueva incidencia reportada', desc: 'Pedro reportó una incidencia de prioridad Media cerca de tu zona.', tiempo: 'Hace 3 horas', leida: true, link: 'avisos.html' },
+  { tipo: 'chat', icono: 'chat_bubble_outline', color: 'text-primary', bg: 'bg-primary/10 border-primary/20', titulo: 'Mensaje en Chat Vecinos', desc: 'Luis: "¿Alguien vio algo sospechoso anoche?"', tiempo: 'Ayer', leida: true, link: 'chat.html' },
+]
+
+let noLeidas = notificaciones.filter(n => !n.leida).length
+
+function renderNotifs() {
+  noLeidas = notificaciones.filter(n => !n.leida).length
+  document.getElementById('notif-count').textContent = `${noLeidas} sin leer`
+  document.getElementById('badge-count').textContent = noLeidas
+
+  document.getElementById('notif-list').innerHTML = notificaciones.map((n, i) => `
+    <div onclick="abrirNotif(${i})" class="notif-item cursor-pointer flex items-start gap-4 p-4 rounded-2xl border ${n.leida ? 'border-border-dark bg-surface-dark/50' : 'border-border-dark bg-surface-dark'} relative">
+      ${!n.leida ? '<div class="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full"></div>' : ''}
+      <div class="w-11 h-11 rounded-xl ${n.bg} border flex items-center justify-center shrink-0 ml-2">
+        <span class="material-icons-round ${n.color}">${n.icono}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-white text-sm">${n.titulo}</p>
+        <p class="text-text-muted text-sm mt-0.5 line-clamp-2">${n.desc}</p>
+        <p class="text-text-muted text-xs mt-2">${n.tiempo}</p>
+      </div>
+      <span class="material-icons-round text-text-muted text-sm shrink-0 mt-1">chevron_right</span>
+    </div>
+  `).join('')
+}
+
+function abrirNotif(i) {
+  notificaciones[i].leida = true
+  if (notificaciones[i].link) location.href = notificaciones[i].link
+  else renderNotifs()
+}
+
+function marcarTodas() {
+  notificaciones.forEach(n => n.leida = true)
+  renderNotifs()
+}
+
+renderNotifs()
+</script>
+<script src="js/notificaciones-app.js"></script>
+<script src="js/sos-draggable.js"></script>
+</body>
+</html>

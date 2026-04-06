@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de encuestas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #f3f6fb;
+            --surface: #ffffff;
+            --surface-soft: #eef4ff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --primary: #2563eb;
+            --primary-soft: rgba(37, 99, 235, 0.12);
+            --border: #dbe5f0;
+            --success: #0f766e;
+            --shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28%),
+                linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 32px auto 48px;
+        }
+
+        .hero,
+        .panel,
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero {
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            color: var(--primary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.8rem, 2vw, 2.5rem);
+        }
+
+        .subtitle {
+            margin: 10px 0 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .panel {
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            gap: 14px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        select,
+        button {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            font: inherit;
+        }
+
+        select {
+            padding: 0 14px;
+            background: #fff;
+            color: var(--text);
+        }
+
+        button {
+            padding: 0 18px;
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            filter: brightness(1.05);
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            padding: 18px;
+            background: var(--surface-soft);
+            border-radius: 18px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .stat-value {
+            margin-top: 8px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .question-card {
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .question-title {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .question-meta {
+            min-width: fit-content;
+            padding: 8px 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .question-body {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+            gap: 22px;
+            align-items: center;
+        }
+
+        .chart-wrap {
+            min-height: 310px;
+        }
+
+        .options-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-row {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        .option-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+
+        .option-name {
+            font-weight: 600;
+        }
+
+        .option-values {
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .progress {
+            margin-top: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #e6edf7;
+            overflow: hidden;
+        }
+
+        .progress > span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #3b82f6 0%, #0f766e 100%);
+        }
+
+        .status,
+        .empty {
+            margin-top: 18px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px dashed var(--border);
+            color: var(--muted);
+        }
+
+        .status.error {
+            color: #b91c1c;
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        .consulta-state {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: #ecfeff;
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        @media (max-width: 860px) {
+            .toolbar,
+            .question-body,
+            .question-header {
+                grid-template-columns: 1fr;
+                display: grid;
+            }
+
+            .question-meta {
+                justify-self: start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <p class="eyebrow">Panel administrador</p>
+            <h1>Resultados de encuestas</h1>
+            <p class="subtitle">Vista tipo formulario: resumen general, porcentajes por opcion y una grafica por cada pregunta de la consulta.</p>
+        </section>
+
+        <section class="panel">
+            <div class="toolbar">
+                <div>
+                    <label for="consultaSelect">Consulta</label>
+                    <select id="consultaSelect">
+                        <option value="">Cargando consultas...</option>
+                    </select>
+                </div>
+                <button id="recargarBtn" type="button">Actualizar resultados</button>
+            </div>
+
+            <div id="encabezadoConsulta"></div>
+            <div id="resumen" class="summary"></div>
+            <div id="estado" class="status">Preparando resultados...</div>
+        </section>
+
+        <section id="preguntas"></section>
+    </main>
+
+    <script>
+        const charts = [];
+        const selectConsulta = document.getElementById("consultaSelect");
+        const contenedorEstado = document.getElementById("estado");
+        const contenedorPreguntas = document.getElementById("preguntas");
+        const contenedorResumen = document.getElementById("resumen");
+        const encabezadoConsulta = document.getElementById("encabezadoConsulta");
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                "\"": "&quot;",
+                "'": "&#39;"
+            }[char]));
+        }
+
+        async function resolverApiBase() {
+            const candidatas = [];
+            if (location.protocol.startsWith("http")) {
+                candidatas.push(location.origin);
+            }
+            candidatas.push("http://127.0.0.1:5004", "http://127.0.0.1:5000");
+
+            for (const base of candidatas) {
+                try {
+                    const respuesta = await fetch(`${base}/`, { method: "GET" });
+                    if (respuesta.ok) {
+                        return base;
+                    }
+                } catch (error) {
+                    console.debug("API no disponible en", base, error);
+                }
+            }
+
+            throw new Error("No fue posible conectar con el servicio de decisiones.");
+        }
+
+        function obtenerConsultaIdUrl() {
+            const params = new URLSearchParams(location.search);
+            return params.get("consulta") || params.get("consulta_id") || "";
+        }
+
+        function actualizarUrl(consultaId) {
+            const url = new URL(location.href);
+            if (consultaId) {
+                url.searchParams.set("consulta", consultaId);
+            } else {
+                url.searchParams.delete("consulta");
+            }
+            history.replaceState({}, "", url);
+        }
+
+        function limpiarGraficas() {
+            while (charts.length) {
+                charts.pop().destroy();
+            }
+        }
+
+        function mostrarEstado(mensaje, esError = false) {
+            contenedorEstado.textContent = mensaje;
+            contenedorEstado.className = esError ? "status error" : "status";
+        }
+
+        function colorPorIndice(indice, alpha = 1) {
+            const paleta = [
+                [37, 99, 235],
+                [14, 116, 144],
+                [5, 150, 105],
+                [217, 119, 6],
+                [220, 38, 38],
+                [124, 58, 237]
+            ];
+            const [r, g, b] = paleta[indice % paleta.length];
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function renderizarResumen(datos) {
+            contenedorResumen.innerHTML = `
+                <article class="stat">
+                    <div class="stat-label">Consulta</div>
+                    <div class="stat-value">${escapeHtml(datos.titulo)}</div>
+                </article>
+                <article class="stat">
+                    <div class="stat-label">Preguntas</div>
+                    <div class="stat-value">${datos.preguntas.length}</div>
+                </article>
+                <article class="stat">
+                    <div class="stat-label">Respuestas totales</div>
+                    <div class="stat-value">${datos.totalVotos}</div>
+                </article>
+                <article class="stat">
+                    <div class="stat-label">Estado</div>
+                    <div class="stat-value">${escapeHtml(datos.estado)}</div>
+                </article>
+            `;
+
+            encabezadoConsulta.innerHTML = `<div class="consulta-state">Estado actual: ${escapeHtml(datos.estado)}</div>`;
+        }
+
+        function renderizarPreguntas(datos) {
+            limpiarGraficas();
+            contenedorPreguntas.innerHTML = "";
+
+            if (!datos.preguntas.length) {
+                contenedorPreguntas.innerHTML = `<div class="empty">Esta consulta todavia no tiene preguntas configuradas.</div>`;
+                return;
+            }
+
+            datos.preguntas.forEach((pregunta, indicePregunta) => {
+                const card = document.createElement("article");
+                card.className = "question-card";
+
+                const opcionesHtml = pregunta.opciones.map((opcion) => `
+                    <div class="option-row">
+                        <div class="option-line">
+                            <span class="option-name">${escapeHtml(opcion.texto)}</span>
+                            <span class="option-values">${opcion.votos} votos | ${opcion.porcentaje}%</span>
+                        </div>
+                        <div class="progress">
+                            <span style="width:${Math.max(Number(opcion.porcentaje), 0)}%"></span>
+                        </div>
+                    </div>
+                `).join("");
+
+                card.innerHTML = `
+                    <div class="question-header">
+                        <div>
+                            <h2 class="question-title">${escapeHtml(pregunta.texto)}</h2>
+                        </div>
+                        <div class="question-meta">${pregunta.totalVotos} respuestas</div>
+                    </div>
+                    <div class="question-body">
+                        <div class="chart-wrap">
+                            <canvas id="grafica-${indicePregunta}"></canvas>
+                        </div>
+                        <div class="options-list">${opcionesHtml}</div>
+                    </div>
+                `;
+
+                contenedorPreguntas.appendChild(card);
+
+                const canvas = card.querySelector("canvas");
+                const labels = pregunta.opciones.map((opcion) => opcion.texto);
+                const valores = pregunta.opciones.map((opcion) => Number(opcion.porcentaje));
+                const colores = pregunta.opciones.map((_, indiceOpcion) => colorPorIndice(indiceOpcion, 0.85));
+                const bordes = pregunta.opciones.map((_, indiceOpcion) => colorPorIndice(indiceOpcion, 1));
+
+                charts.push(new Chart(canvas, {
+                    type: "bar",
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: "Porcentaje de votos",
+                            data: valores,
+                            backgroundColor: colores,
+                            borderColor: bordes,
+                            borderWidth: 1.5,
+                            borderRadius: 12
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: "y",
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label(context) {
+                                        const opcion = pregunta.opciones[context.dataIndex];
+                                        return `${opcion.porcentaje}% (${opcion.votos} votos)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback(value) {
+                                        return `${value}%`;
+                                    }
+                                },
+                                grid: {
+                                    color: "rgba(148, 163, 184, 0.18)"
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            });
+        }
+
+        async function cargarConsultas(apiBase) {
+            const respuesta = await fetch(`${apiBase}/admin/consultas`);
+            if (!respuesta.ok) {
+                throw new Error("No se pudieron cargar las consultas del panel administrador.");
+            }
+
+            const xml = new DOMParser().parseFromString(await respuesta.text(), "application/xml");
+            return Array.from(xml.querySelectorAll("consulta")).map((consulta) => ({
+                id: consulta.querySelector("id")?.textContent || "",
+                titulo: consulta.querySelector("titulo")?.textContent || "Consulta sin titulo",
+                estado: consulta.querySelector("estado")?.textContent || "sin estado",
+                totalVotos: Number(consulta.querySelector("total_votos")?.textContent || 0)
+            }));
+        }
+
+        async function cargarResultadosConsulta(apiBase, consultaId) {
+            const respuesta = await fetch(`${apiBase}/consultas/${consultaId}/resultados`);
+            if (!respuesta.ok) {
+                throw new Error("No se pudieron obtener los resultados de la consulta seleccionada.");
+            }
+
+            const xml = new DOMParser().parseFromString(await respuesta.text(), "application/xml");
+            const preguntas = Array.from(xml.documentElement.children)
+                .filter((nodo) => nodo.tagName === "pregunta")
+                .map((pregunta) => ({
+                    id: pregunta.querySelector("id")?.textContent || "",
+                    texto: pregunta.querySelector("texto")?.textContent || "Pregunta",
+                    totalVotos: Number(pregunta.querySelector("total_votos")?.textContent || 0),
+                    opciones: Array.from(pregunta.querySelectorAll("opcion")).map((opcion) => ({
+                        id: opcion.querySelector("id")?.textContent || "",
+                        texto: opcion.querySelector("texto")?.textContent || "Opcion",
+                        votos: Number(opcion.querySelector("votos")?.textContent || 0),
+                        porcentaje: Number(opcion.querySelector("porcentaje")?.textContent || 0).toFixed(1)
+                    }))
+                }));
+
+            return {
+                id: xml.querySelector("consulta_id")?.textContent || consultaId,
+                titulo: xml.querySelector("titulo")?.textContent || "Consulta",
+                estado: xml.querySelector("estado")?.textContent || "sin estado",
+                totalVotos: Number(xml.querySelector("total_votos")?.textContent || 0),
+                preguntas
+            };
+        }
+
+        async function refrescarResultados() {
+            const consultaId = selectConsulta.value;
+            if (!consultaId) {
+                contenedorResumen.innerHTML = "";
+                encabezadoConsulta.innerHTML = "";
+                contenedorPreguntas.innerHTML = `<div class="empty">Selecciona una consulta para ver sus resultados.</div>`;
+                mostrarEstado("Selecciona una consulta disponible.");
+                return;
+            }
+
+            mostrarEstado("Cargando resultados...");
+            const datos = await cargarResultadosConsulta(window.API_BASE, consultaId);
+            renderizarResumen(datos);
+            renderizarPreguntas(datos);
+            actualizarUrl(consultaId);
+            mostrarEstado(`Resultados actualizados para "${datos.titulo}".`);
+        }
+
+        async function iniciar() {
+            try {
+                mostrarEstado("Buscando servicio de decisiones...");
+                window.API_BASE = await resolverApiBase();
+
+                const consultas = await cargarConsultas(window.API_BASE);
+                if (!consultas.length) {
+                    selectConsulta.innerHTML = `<option value="">No hay consultas creadas</option>`;
+                    contenedorPreguntas.innerHTML = `<div class="empty">Aun no existen consultas registradas para mostrar en graficas.</div>`;
+                    contenedorResumen.innerHTML = "";
+                    encabezadoConsulta.innerHTML = "";
+                    mostrarEstado("No hay consultas creadas todavia.");
+                    return;
+                }
+
+                selectConsulta.innerHTML = consultas.map((consulta) => `
+                    <option value="${consulta.id}">${escapeHtml(consulta.titulo)} | ${escapeHtml(consulta.estado)} | ${consulta.totalVotos} votos</option>
+                `).join("");
+
+                const consultaUrl = obtenerConsultaIdUrl();
+                const existeConsultaUrl = consultas.some((consulta) => consulta.id === consultaUrl);
+                selectConsulta.value = existeConsultaUrl ? consultaUrl : consultas[0].id;
+
+                await refrescarResultados();
+            } catch (error) {
+                console.error(error);
+                limpiarGraficas();
+                contenedorResumen.innerHTML = "";
+                encabezadoConsulta.innerHTML = "";
+                contenedorPreguntas.innerHTML = `<div class="empty">No fue posible mostrar las graficas en este momento.</div>`;
+                mostrarEstado(error.message || "Ocurrio un error inesperado al cargar los resultados.", true);
+            }
+        }
+
+        selectConsulta.addEventListener("change", () => {
+            refrescarResultados().catch((error) => {
+                console.error(error);
+                mostrarEstado(error.message || "No fue posible actualizar los resultados.", true);
+            });
+        });
+
+        document.getElementById("recargarBtn").addEventListener("click", () => {
+            refrescarResultados().catch((error) => {
+                console.error(error);
+                mostrarEstado(error.message || "No fue posible recargar los resultados.", true);
+            });
+        });
+
+        iniciar();
+    </script>
+</body>
+</html>

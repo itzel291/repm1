@@ -1,0 +1,749 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela - Inicio</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#0DF2CC',
+        'primary-dim': '#0BC4A5',
+        'bg-dark': '#0D1C19',
+        'bg-light': '#F5F8F8',
+        'surface-dark': '#152321',
+        'surface-darker': '#0F1A17',
+        'surface-light': '#FFFFFF',
+        'sidebar': '#0A1512',
+        'border-dark': '#1E3330',
+        'border-light': '#E2EAE8',
+        'text-muted': '#6B9E96',
+        'sos': '#EF4444',
+      },
+      fontFamily: {
+        sans: ['Outfit', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  * { font-family: 'Outfit', sans-serif; }
+  body { background: #0D1C19; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1E3330; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #0DF2CC33; }
+
+  /* SOS pulse */
+  @keyframes sos-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+    50% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
+  }
+  .sos-pulse { animation: sos-pulse 2s infinite; }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.5s ease forwards; }
+  .fade-up-1 { animation-delay: 0.05s; opacity: 0; }
+  .fade-up-2 { animation-delay: 0.12s; opacity: 0; }
+  .fade-up-3 { animation-delay: 0.19s; opacity: 0; }
+  .fade-up-4 { animation-delay: 0.26s; opacity: 0; }
+
+  /* Nav item active */
+  .nav-item { transition: all 0.2s ease; }
+  .nav-item:hover { background: rgba(13,242,204,0.06); color: #0DF2CC; }
+  .nav-item.active { background: rgba(13,242,204,0.12); color: #0DF2CC; }
+  .nav-item.active .nav-icon { color: #0DF2CC; }
+
+  /* Card hover */
+  .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(13,242,204,0.08); }
+
+  /* Primary glow */
+  .primary-glow { box-shadow: 0 4px 20px rgba(13,242,204,0.25); }
+
+  /* News card image */
+  .news-img { transition: transform 0.4s ease; }
+  .news-card:hover .news-img { transform: scale(1.04); }
+
+  /* â”€â”€ LIGHT THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  html.light body { background: #EEF3F2 !important; color: #0D2B27; }
+  html.light aside { background: #E2EEEC !important; border-color: #BDD0CD !important; }
+  html.light header { background: #F8FAFA !important; border-color: #BDD0CD !important; }
+  html.light .bg-sidebar { background: #E2EEEC !important; }
+  html.light .bg-surface-darker { background: #F8FAFA !important; }
+  html.light .bg-surface-dark { background: #FFFFFF !important; }
+  html.light .border-border-dark { border-color: #BDD0CD !important; }
+  html.light .text-white { color: #0D2B27 !important; }
+  html.light .text-text-muted { color: #4D8078 !important; }
+  html.light .nav-item:hover { background: rgba(13,242,204,0.12) !important; }
+  html.light .nav-item.active { background: rgba(13,242,204,0.20) !important; color: #0D7A64 !important; }
+  html.light .nav-item.active .nav-icon { color: #0D7A64 !important; }
+  html.light #search-dropdown { background: #FFFFFF !important; border-color: #BDD0CD !important; box-shadow: 0 12px 32px rgba(0,0,0,0.10) !important; }
+  html.light .sd-item { color: #0D2B27 !important; }
+  html.light .sd-item:hover { background: rgba(13,242,204,0.10) !important; }
+  html.light .sd-empty { color: #4D8078 !important; }
+  html.light ::-webkit-scrollbar-thumb { background: #BDD0CD; }
+  html.light .prio-alta  { background: #FEE2E2 !important; color: #991B1B !important; }
+  html.light .prio-media { background: #FEF3C7 !important; color: #92400E !important; }
+  html.light .prio-baja  { background: #D1FAE5 !important; color: #065F46 !important; }
+</style>
+</head>
+<body class="h-screen overflow-hidden flex text-white">
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SIDEBAR
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+
+  <!-- Logo -->
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl tracking-wide text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">home</span>
+      Inicio
+    </a>
+    <a href="avisos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">campaign</span>
+      Avisos
+    </a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">article</span>
+      Publicaciones
+    </a>
+    <a href="eventos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">event</span>
+      Eventos
+    </a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">chat_bubble_outline</span>
+      Mensajes
+    </a>
+    <a href="notificaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">notifications_none</span>
+      Notificaciones
+      <span id="nav-badge-count" class="ml-auto bg-primary text-bg-dark text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
+    </a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">newspaper</span>
+      Noticias
+    </a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">history</span>
+      Historial
+    </a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">person_outline</span>
+      Perfil
+    </a>
+
+    <!-- Admin separator -->
+    <div class="pt-4 pb-2">
+      <p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administración</p>
+    </div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round nav-icon text-xl">shield_outlined</span>
+      Panel de seguridad
+    </a>
+    <a href="detector_gesto.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium">
+      <span class="material-icons-round text-xl">sign_language</span>
+      Modo Accesibilidad
+    </a>
+  </nav>
+
+  <!-- User -->
+  <div class="p-4 border-t border-border-dark">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-dark cursor-pointer transition-colors" onclick="location.href='perfil.html'">
+      <div class="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm" id="user-initial">M</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white truncate" id="user-name">MULAN</p>
+        <p class="text-xs text-text-muted truncate" id="user-casa">Casa 17</p>
+      </div>
+      <button onclick="cerrarSesion(event)" class="text-text-muted hover:text-sos transition-colors" title="Cerrar sesión">
+        <span class="material-icons-round text-base">logout</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     MAIN CONTENT
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+
+  <!-- Header -->
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
+    <div>
+      <h2 class="text-xl font-bold text-white">¡Bienvenido!</h2>
+      <p class="text-text-muted text-sm">Panel de control principal</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative hidden md:block">
+        <span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-lg">search</span>
+        <input class="pl-10 pr-4 py-2 w-56 rounded-xl bg-surface-dark border border-border-dark text-sm text-white placeholder-text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all" id="search-input" oninput="buscar(this.value)" placeholder="Buscar sección..."/>
+      </div>
+      <button onclick="location.href='notificaciones.html'" class="relative p-2 rounded-xl bg-surface-dark border border-border-dark hover:border-primary/30 transition-colors">
+        <span class="material-icons-round text-text-muted text-xl">notifications_none</span>
+        <span id="header-notif-dot" class="absolute top-2 right-2 w-2 h-2 bg-sos rounded-full hidden"></span>
+      </button>
+      <button onclick="toggleTheme()" class="p-2 rounded-xl bg-surface-dark border border-border-dark hover:border-primary/30 transition-colors">
+        <span class="material-icons-round text-text-muted text-xl" id="theme-icon">light_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Scrollable content -->
+  <div class="flex-1 overflow-y-auto p-8 space-y-8">
+
+    <!-- EVENTS BANNER -->
+    <section class="fade-up fade-up-1">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Próximos eventos</h3>
+        <a href="eventos.html" class="text-primary text-sm font-semibold hover:text-primary-dim transition-colors">Ver todo →</a>
+      </div>
+      <div id="dashboard-event-card" class="relative w-full h-64 rounded-2xl overflow-hidden group cursor-pointer" onclick="location.href='eventos.html'">
+        <img id="dashboard-event-image" src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80" class="w-full h-full object-cover news-img" alt="Evento comunitario"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-bg-dark via-bg-dark/40 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 p-8">
+          <span id="dashboard-event-category" class="px-3 py-1 bg-primary text-bg-dark text-xs font-bold rounded-full uppercase tracking-wider">Cultural</span>
+          <h3 id="dashboard-event-title" class="text-3xl font-bold text-white mt-3">Festividades y celebraciones</h3>
+          <p id="dashboard-event-description" class="text-gray-300 text-sm mt-1 max-w-lg">Primavera biocultural: cuéntanos qué elementos de la biodiversidad son típicos en tu estado esta temporada.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section class="fade-up fade-up-2">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Vecinos</h3>
+        <div class="flex gap-2">
+          <button id="btn-prev" onclick="prevVecinos()" class="w-8 h-8 rounded-lg bg-surface-dark border border-border-dark flex items-center justify-center hover:border-primary/30 transition-colors opacity-40 cursor-not-allowed" disabled>
+            <span class="material-icons-round text-text-muted text-sm">chevron_left</span>
+          </button>
+          <button id="btn-next" onclick="nextVecinos()" class="w-8 h-8 rounded-lg bg-surface-dark border border-border-dark flex items-center justify-center hover:border-primary/30 transition-colors">
+            <span class="material-icons-round text-text-muted text-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-5 gap-4" id="members-grid">
+        <!-- Generated by JS -->
+      </div>
+    </section>
+
+    <!-- NEWS -->
+    
+       
+    <!-- INCIDENCIAS -->
+    <section class="fade-up fade-up-4" id="section-incidencias">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Últimas incidencias</h3>
+        <a href="historial.html" class="text-primary text-sm font-semibold hover:text-primary-dim transition-colors">Ver todo →</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="incidencias-grid">
+        <!-- Cargado por JS -->
+      </div>
+    </section>
+
+    <!-- PUBLICACIONES -->
+    <section class="fade-up fade-up-4" id="section-publicaciones">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Publicaciones recientes</h3>
+        <a href="publicaciones.html" class="text-primary text-sm font-semibold hover:text-primary-dim transition-colors">Ver todo →</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="publicaciones-grid">
+        <!-- Cargado por JS -->
+      </div>
+    </section>
+
+    <!-- Bottom padding -->
+    <div class="h-20"></div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SOS BUTTON
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<button onclick="location.href='panico.html'"
+  class="sos-pulse fixed bottom-8 right-8 z-50 w-16 h-16 bg-sos rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform border-4 border-red-400">
+  <span class="material-icons-round text-white text-2xl">emergency</span>
+  <span class="text-white text-[9px] font-black uppercase tracking-wider">SOS</span>
+</button>
+
+<script>
+// â”€â”€ Recibir token desde URL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const params = new URLSearchParams(window.location.search)
+if (params.get('token')) {
+  localStorage.setItem('token', params.get('token'))
+  localStorage.setItem('usuarioActual', params.get('usuario') || 'Vecino')
+  localStorage.setItem('nombre', params.get('usuario') || 'Vecino')
+  if (params.get('casa')) localStorage.setItem('numeroCasa', params.get('casa'))
+  window.history.replaceState({}, '', '/dashboard.html')
+}
+
+// Sesión
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || localStorage.getItem('nombre') || 'Vecino'
+const casa = localStorage.getItem('numeroCasa') || ''
+const runtime = window.CentinelaRuntime
+const LOGIN_URL = runtime ? runtime.appUrl('login.html') : 'http://localhost:3000/login.html'
+const IDENTITY_API = runtime ? runtime.serviceUrl(8000) : 'http://localhost:8000'
+const POSTS_API = runtime ? runtime.serviceUrl(5002) : 'http://localhost:5002'
+const INCIDENTS_API = runtime ? runtime.serviceUrl(5001) : 'http://localhost:5001'
+if (!token) window.location.href = LOGIN_URL
+
+document.getElementById('user-name').textContent = nombre
+document.getElementById('user-casa').textContent = casa || 'Centinela'
+document.getElementById('user-initial').textContent = nombre.charAt(0).toUpperCase()
+
+// â”€â”€ Theme toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const temaGuardado = localStorage.getItem('tema') || 'dark'
+function aplicarTema(tema) {
+  if (tema === 'light') {
+    document.documentElement.classList.remove('dark')
+    document.documentElement.classList.add('light')
+    document.getElementById('theme-icon').textContent = 'dark_mode'
+  } else {
+    document.documentElement.classList.add('dark')
+    document.documentElement.classList.remove('light')
+    document.getElementById('theme-icon').textContent = 'light_mode'
+  }
+}
+aplicarTema(temaGuardado)
+
+function toggleTheme() {
+  const esDark = document.documentElement.classList.contains('dark')
+  const nuevoTema = esDark ? 'light' : 'dark'
+  localStorage.setItem('tema', nuevoTema)
+  aplicarTema(nuevoTema)
+}
+
+// â”€â”€ Buscador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const colores = {
+  'avisos':          { icon: 'campaign',       color: '#EF4444' },
+  'publicaciones':   { icon: 'article',        color: '#0DF2CC' },
+  'eventos':         { icon: 'event',          color: '#F59E0B' },
+  'chat':            { icon: 'chat_bubble',    color: '#3B82F6' },
+  'notificaciones':  { icon: 'notifications',  color: '#8B5CF6' },
+  'noticias':        { icon: 'newspaper',      color: '#10B981' },
+  'historial':       { icon: 'history',        color: '#6B7280' },
+  'perfil':          { icon: 'person',         color: '#0DF2CC' },
+  'admin':           { icon: 'shield',         color: '#F59E0B' },
+}
+
+const secciones = [
+  { label: 'Avisos',         keywords: 'avisos incidencias reportes emergencias seguridad alerta',      url: 'avisos.html' },
+  { label: 'Publicaciones',  keywords: 'publicaciones tablón posts comunidad anuncios avisos',           url: 'publicaciones.html' },
+  { label: 'Eventos',        keywords: 'eventos culturales actividades calendario reunión fiesta',        url: 'eventos.html' },
+  { label: 'Mensajes',       keywords: 'mensajes chat conversaciones hablar vecinos privado',           url: 'chat.html' },
+  { label: 'Notificaciones', keywords: 'notificaciones alertas novedades avisos nuevos',                url: 'notificaciones.html' },
+  { label: 'Noticias',       keywords: 'noticias recientes actualidad colonia información',              url: 'noticias.html' },
+  { label: 'Historial',      keywords: 'historial visitados recientes anteriores',                      url: 'historial.html' },
+  { label: 'Perfil',         keywords: 'perfil usuario cuenta datos personales nombre casa',            url: 'perfil.html' },
+  { label: 'Panel Admin',    keywords: 'admin administrador panel seguridad vecinos registrados mapa',  url: 'admin.html' },
+]
+
+// Inyectar estilos del dropdown
+const style = document.createElement('style')
+style.textContent = `
+  #search-wrap { position: relative; }
+  #search-dropdown {
+    position: absolute; top: calc(100% + 8px); left: 0;
+    width: 100%; min-width: 240px;
+    background: #152321; border: 1px solid #1E3330;
+    border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    z-index: 9999; overflow: hidden; display: none;
+  }
+  #search-dropdown.show { display: block; }
+  .sd-item { padding: 10px 16px; color: #fff; font-size: 13px;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    transition: background .15s; }
+  .sd-item:hover { background: rgba(13,242,204,0.08); }
+  .sd-empty { padding: 12px 16px; color: #6B9E96; font-size: 13px; }
+`
+document.head.appendChild(style)
+
+// Crear wrapper y dropdown
+const searchInput = document.getElementById('search-input')
+const wrap = document.createElement('div')
+wrap.id = 'search-wrap'
+searchInput.parentNode.insertBefore(wrap, searchInput)
+wrap.appendChild(searchInput)
+
+const dropdown = document.createElement('div')
+dropdown.id = 'search-dropdown'
+wrap.appendChild(dropdown)
+
+function renderDropdown(lista, query) {
+  dropdown.innerHTML = ''
+  if (lista.length === 0) {
+    dropdown.innerHTML = `<div class="sd-empty">Sin resultados para "${query}"</div>`
+  } else {
+    lista.forEach(r => {
+      const key = r.url.replace('.html', '')
+      const c = colores[key] || { icon: 'arrow_forward', color: '#0DF2CC' }
+      const div = document.createElement('div')
+      div.className = 'sd-item'
+      div.innerHTML = `<span class="material-icons-round" style="color:${c.color};font-size:18px">${c.icon}</span>${r.label}`
+      div.onclick = () => location.href = r.url
+      dropdown.appendChild(div)
+    })
+  }
+  dropdown.classList.add('show')
+}
+
+searchInput.addEventListener('focus', () => {
+  if (!searchInput.value.trim()) renderDropdown(secciones, '')
+})
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase()
+  if (!q) { renderDropdown(secciones, ''); return }
+  const resultados = secciones.filter(s =>
+    s.label.toLowerCase().includes(q) || s.keywords.toLowerCase().includes(q)
+  )
+  renderDropdown(resultados, searchInput.value)
+})
+
+document.addEventListener('click', (e) => {
+  if (!wrap.contains(e.target)) dropdown.classList.remove('show')
+})
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { dropdown.classList.remove('show'); searchInput.value = '' }
+})
+
+// â”€â”€ Colores para avatares de vecinos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const avatarColors = [
+  '#0DF2CC','#3B82F6','#F59E0B','#EF4444','#8B5CF6',
+  '#10B981','#F97316','#EC4899','#6366F1','#14B8A6'
+]
+
+// â”€â”€ Carrusel de vecinos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const grid = document.getElementById('members-grid')
+let allVecinos = []
+let carouselIdx = 0
+const VISIBLE = 5
+
+function renderVecinos(lista) {
+  if (!lista.length) {
+    grid.innerHTML = `<div class="col-span-full text-sm text-text-muted bg-surface-dark border border-border-dark rounded-2xl p-5">Aún no hay vecinos registrados para mostrar.</div>`
+    return
+  }
+  grid.innerHTML = lista.map((v, i) => {
+    const idx = (carouselIdx + i) % avatarColors.length
+    const inicial = (v.nombre || '?').charAt(0).toUpperCase()
+    const color = avatarColors[idx % avatarColors.length]
+    const nombreSeguro = (v.nombre || '').replace(/'/g, '&#39;')
+    return `
+      <div onclick="abrirChatPrivado('${nombreSeguro}')"
+           class="flex flex-col items-center gap-2 group cursor-pointer" title="Chatear con ${v.nombre}">
+        <div class="w-14 h-14 rounded-full border-2 transition-all overflow-hidden flex items-center justify-center relative"
+             style="background:${color}22; border-color:${color}44">
+          <span class="font-black text-xl" style="color:${color}">${inicial}</span>
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
+               transition-opacity" style="background:${color}55">
+            <span class="material-icons-round text-white text-lg">chat_bubble</span>
+          </div>
+        </div>
+        <span class="text-sm font-semibold text-white truncate max-w-[80px] text-center leading-tight">${(v.alias || v.nombre || '').split(' ')[0]}</span>
+        <span class="text-xs text-text-muted">${v.casa || ''}</span>
+      </div>`
+  }).join('')
+}
+
+function actualizarCarrusel() {
+  const pagina = allVecinos.slice(carouselIdx, carouselIdx + VISIBLE)
+  renderVecinos(pagina)
+  const btnPrev = document.getElementById('btn-prev')
+  const btnNext = document.getElementById('btn-next')
+  if (carouselIdx <= 0) {
+    btnPrev.disabled = true; btnPrev.classList.add('opacity-40','cursor-not-allowed')
+  } else {
+    btnPrev.disabled = false; btnPrev.classList.remove('opacity-40','cursor-not-allowed')
+  }
+  if (carouselIdx + VISIBLE >= allVecinos.length) {
+    btnNext.disabled = true; btnNext.classList.add('opacity-40','cursor-not-allowed')
+  } else {
+    btnNext.disabled = false; btnNext.classList.remove('opacity-40','cursor-not-allowed')
+  }
+}
+
+function prevVecinos() {
+  if (carouselIdx > 0) { carouselIdx--; actualizarCarrusel() }
+}
+function nextVecinos() {
+  if (carouselIdx + VISIBLE < allVecinos.length) { carouselIdx++; actualizarCarrusel() }
+}
+
+async function cargarVecinos() {
+  try {
+    const res = await fetch(`${IDENTITY_API}/api/admin/usuarios/`)
+    if (res.ok) {
+      const usuarios = await res.json()
+      const registrados = usuarios
+        .filter(u => u.activo !== false)
+        .map(u => {
+          const nombreCompleto = u.nombre_completo || 'Vecino'
+          const esActual = nombreCompleto.toLowerCase() === nombre.toLowerCase()
+          return {
+            nombre: nombreCompleto,
+            alias: esActual ? 'Tú' : nombreCompleto,
+            casa: u.casa || ''
+          }
+        })
+      if (registrados.length > 0) { allVecinos = registrados; actualizarCarrusel(); return }
+    }
+  } catch(e) {}
+
+  allVecinos = []
+  actualizarCarrusel()
+}
+
+// â”€â”€ Abrir chat privado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function abrirChatPrivado(nombreVecino) {
+  localStorage.setItem('chatPrivadoCon', nombreVecino)
+  location.href = 'chat.html'
+}
+
+// Cerrar sesión
+function cerrarSesion(e) {
+  e.stopPropagation()
+  localStorage.clear()
+  window.location.href = LOGIN_URL
+}
+
+cargarVecinos()
+
+async function cargarBadgeNotificaciones() {
+  try {
+    const res = await fetch(`${POSTS_API}/notifications`, {
+      headers: { 'Authorization': `Token ${token}` }
+    })
+    if (!res.ok) return
+
+    const data = await res.json()
+    const total = Number(data.unread_count || 0)
+    const badge = document.getElementById('nav-badge-count')
+    const dot = document.getElementById('header-notif-dot')
+
+    if (badge) {
+      badge.textContent = `${total}`
+      if (total <= 0) {
+        badge.classList.add('hidden')
+      } else {
+        badge.classList.remove('hidden')
+      }
+    }
+
+    if (dot) {
+      if (total <= 0) {
+        dot.classList.add('hidden')
+      } else {
+        dot.classList.remove('hidden')
+      }
+    }
+  } catch (e) {}
+}
+
+async function cargarEventoPrincipal() {
+  try {
+    const res = await fetch(`${POSTS_API}/events`, {
+      headers: { 'Authorization': `Token ${token}` }
+    })
+    if (!res.ok) return
+    const eventos = await res.json()
+    const aprobados = Array.isArray(eventos)
+      ? eventos.filter((evento) => evento.status === 'approved')
+      : []
+    if (!aprobados.length) return
+
+    const destacado = aprobados[0]
+    const categoria = document.getElementById('dashboard-event-category')
+    const titulo = document.getElementById('dashboard-event-title')
+    const descripcion = document.getElementById('dashboard-event-description')
+    const imagen = document.getElementById('dashboard-event-image')
+
+    if (categoria) categoria.textContent = destacado.categoria || 'Comunitario'
+    if (titulo) titulo.textContent = destacado.titulo || 'Evento de la comunidad'
+    if (descripcion) {
+      descripcion.textContent = destacado.descripcion || `${destacado.autor || 'Un vecino'} organizó una actividad para la comunidad.`
+    }
+    if (imagen) {
+      const imagenesPorCategoria = {
+        'Cultural': 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80',
+        'Deportivo': 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=80',
+        'Seguridad': 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=1200&q=80',
+        'Educativo': 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&q=80',
+        'Comunitario': 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80'
+      }
+      imagen.src = imagenesPorCategoria[destacado.categoria] || imagenesPorCategoria['Comunitario']
+    }
+  } catch (e) {}
+}
+
+// â”€â”€ Incidencias â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const prioConfig = {
+  'critica':  { label: 'Crítica', bg: '#EF4444', text: '#fff' },
+  'alta':     { label: 'Alta',    bg: '#EF4444', text: '#fff' },
+  'media':    { label: 'Media',   bg: '#F59E0B', text: '#fff' },
+  'baja':     { label: 'Baja',    bg: '#10B981', text: '#fff' },
+}
+
+function renderIncidenciasFallback() {
+  const demo = [
+    { titulo: 'Robo a vehículo',        descripcion: 'Robo de autopartes en estacionamiento norte.', prioridad: 'alta',  fecha: 'Hace 1 hora' },
+    { titulo: 'Falla en alumbrado',     descripcion: 'Luminaria apagada en calle principal, zona 3.', prioridad: 'media', fecha: 'Hace 3 horas' },
+    { titulo: 'Persona sospechosa',     descripcion: 'Individuo merodeando en acceso peatonal sur.', prioridad: 'baja',  fecha: 'Ayer' },
+  ]
+  renderIncidencias(demo)
+}
+
+function renderIncidencias(lista) {
+  const grid = document.getElementById('incidencias-grid')
+  const prioridadOrden = { 'critica': 0, 'crítica': 0, 'alta': 1, 'media': 2, 'baja': 3 }
+  const ordenadas = [...lista].sort((a, b) => {
+    const pa = prioridadOrden[(a.prioridad || 'baja').toLowerCase()] ?? 9
+    const pb = prioridadOrden[(b.prioridad || 'baja').toLowerCase()] ?? 9
+    if (pa !== pb) return pa - pb
+    return String(b.fecha || b.created_at || '').localeCompare(String(a.fecha || a.created_at || ''))
+  })
+  grid.innerHTML = ordenadas.slice(0, 3).map(inc => {
+    const p = (inc.prioridad || 'baja').toLowerCase()
+    const cfg = prioConfig[p] || prioConfig['baja']
+    const desc = (inc.descripcion || inc.detalle || '').substring(0, 90)
+    let imagenes = []
+    try { imagenes = JSON.parse(inc.imagenes || '[]') } catch (e) {}
+    return `
+      <article class="bg-surface-dark rounded-2xl border border-border-dark card-hover cursor-pointer p-5"
+               onclick="location.href='avisos.html'">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full prio-${p}"
+                style="background:${cfg.bg}22; color:${cfg.bg}">${cfg.label}</span>
+          <span class="text-text-muted text-xs">${inc.fecha || inc.created_at || ''}</span>
+        </div>
+        ${imagenes[0] ? `<div class="h-36 rounded-2xl overflow-hidden mb-4 border border-border-dark"><img src="${imagenes[0]}" class="w-full h-full object-cover"/></div>` : ''}
+        <h4 class="font-bold text-white mb-1 leading-snug">${inc.titulo || inc.tipo || 'Incidencia'}</h4>
+        <p class="text-text-muted text-sm line-clamp-2">${desc}${desc.length >= 90 ? '...' : ''}</p>
+        <button class="mt-3 text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+          Ver detalle <span class="material-icons-round text-sm">arrow_forward</span>
+        </button>
+      </article>`
+  }).join('')
+}
+
+async function cargarIncidencias() {
+  try {
+    const res = await fetch(`${INCIDENTS_API}/api/consultar_incidencias?rol=usuario`)
+    if (res.ok) {
+      const text = await res.text()
+      const xml = new DOMParser().parseFromString(text, 'text/xml')
+      const items = xml.getElementsByTagName('incidencia')
+      const lista = []
+      for (let i = 0; i < items.length; i++) {
+        const g = (tag) => items[i].getElementsByTagName(tag)[0]?.textContent || ''
+        lista.push({
+          titulo: g('categoria') || 'Incidencia',
+          descripcion: g('descripcion'),
+          prioridad: g('prioridad') || 'Baja',
+          fecha: `${g('fecha')} ${g('hora')}`.trim(),
+          imagenes: g('imagenes'),
+          estado: g('estado')
+        })
+      }
+      if (lista.length > 0) { renderIncidencias(lista); return }
+    }
+  } catch(e) {}
+  renderIncidenciasFallback()
+}
+
+// â”€â”€ Publicaciones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function renderPublicacionesFallback() {
+  const demo = [
+    { autor: 'Carlos M.',  contenido: 'Recordatorio: junta de vecinos el próximo viernes 7pm en el salón principal.', created_at: 'Hace 2 horas' },
+    { autor: 'Laura S.',   contenido: 'Perdí a mi gato gris con collar azul en la zona del parque. Cualquier info al 5522334455.', created_at: 'Hace 5 horas' },
+    { autor: 'Administración', contenido: 'Se suspende el servicio de agua el martes de 8 a 12hrs por mantenimiento de red.', created_at: 'Ayer' },
+  ]
+  renderPublicaciones(demo)
+}
+
+function renderPublicaciones(lista) {
+  const grid = document.getElementById('publicaciones-grid')
+  grid.innerHTML = lista.slice(0, 3).map(pub => {
+    const autor = pub.autor || pub.nombre_usuario || pub.username || 'Vecino'
+    const inicial = autor.charAt(0).toUpperCase()
+    const contenido = (pub.contenido || pub.texto || pub.body || '').substring(0, 100)
+    const fecha = pub.created_at || pub.fecha || ''
+    return `
+      <article class="bg-surface-dark rounded-2xl border border-border-dark card-hover cursor-pointer p-5"
+               onclick="location.href='publicaciones.html'">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-9 h-9 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-primary font-bold text-sm shrink-0">${inicial}</div>
+          <div>
+            <p class="text-sm font-semibold text-white leading-none">${autor}</p>
+            <p class="text-xs text-text-muted mt-0.5">${fecha}</p>
+          </div>
+        </div>
+        <p class="text-text-muted text-sm line-clamp-3">${contenido}${contenido.length >= 100 ? '...' : ''}</p>
+        <button class="mt-3 text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+          Ver publicación <span class="material-icons-round text-sm">arrow_forward</span>
+        </button>
+      </article>`
+  }).join('')
+}
+
+async function cargarPublicaciones() {
+  try {
+    const res = await fetch(`${POSTS_API}/posts`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const lista = Array.isArray(data) ? data : (data.posts || data.data || [])
+      if (lista.length > 0) { renderPublicaciones(lista); return }
+    }
+  } catch(e) {}
+  renderPublicacionesFallback()
+}
+
+cargarIncidencias()
+cargarPublicaciones()
+cargarBadgeNotificaciones()
+cargarEventoPrincipal()
+</script>
+<script src="js/sos-draggable.js"></script>
+<script>
+  fetch('asistente.html')
+    .then(r => r.text())
+    .then(html => { document.body.insertAdjacentHTML('beforeend', html) })
+    .catch(e => console.log('Asistente no disponible'))
+</script>
+</body>
+</html>

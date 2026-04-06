@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela - Avisos</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444',
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+<style>
+* { font-family:'Outfit',sans-serif; }
+body { background:#0D1C19; }
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1E3330;border-radius:99px}
+@keyframes sos-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}
+.sos-pulse{animation:sos-pulse 2s infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s ease forwards}
+.nav-item{transition:all .2s ease}
+.nav-item:hover{background:rgba(13,242,204,.06);color:#0DF2CC}
+.nav-item.active{background:rgba(13,242,204,.12);color:#0DF2CC}
+.card-hover{transition:transform .2s,box-shadow .2s}
+.card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,242,204,.07)}
+</style>
+</head>
+<body class="h-screen overflow-hidden flex text-white">
+
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">home</span>Inicio</a>
+    <a href="avisos.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><span class="material-icons-round text-xl">campaign</span>Avisos</a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">article</span>Publicaciones</a>
+    <a href="eventos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">event</span>Eventos</a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">chat_bubble_outline</span>Mensajes</a>
+    <a href="notificaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">notifications_none</span>Notificaciones</a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">newspaper</span>Noticias</a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">history</span>Historial</a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">person_outline</span>Perfil</a>
+    <div class="pt-4 pb-2"><p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administración</p></div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+  </nav>
+  <div class="p-4 border-t border-border-dark">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-dark cursor-pointer transition-colors" onclick="location.href='perfil.html'">
+      <div class="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm" id="user-initial">V</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white truncate" id="user-name">Vecino</p>
+        <p class="text-xs text-text-muted truncate" id="user-casa">Casa</p>
+      </div>
+      <button onclick="cerrarSesion(event)" class="text-text-muted hover:text-sos transition-colors"><span class="material-icons-round text-base">logout</span></button>
+    </div>
+  </div>
+</aside>
+
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Avisos</h2>
+      <p class="text-text-muted text-sm">Incidencias reportadas en la comunidad</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="abrirModalNuevo()" class="flex items-center gap-2 px-4 py-2 bg-primary text-bg-dark font-bold rounded-xl hover:bg-primary-dim transition-colors text-sm">
+        <span class="material-icons-round text-lg">add</span> Reportar
+      </button>
+      <button onclick="location.href='notificaciones.html'" class="relative p-2 rounded-xl bg-surface-dark border border-border-dark hover:border-primary/30 transition-colors">
+        <span class="material-icons-round text-text-muted text-xl">notifications_none</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-col gap-4 px-8 pt-5 border-b border-border-dark shrink-0 pb-4">
+    <div class="flex gap-1">
+      <button onclick="setTab('activos')" id="tab-activos" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-primary text-primary bg-primary/10 transition-all">Activos</button>
+      <button onclick="setTab('todos')" id="tab-todos" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-text-muted hover:text-white transition-all">Todos</button>
+      <button onclick="setTab('mis')" id="tab-mis" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-text-muted hover:text-white transition-all">Mis reportes</button>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-end gap-3">
+      <div class="flex-1">
+        <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Filtrar por categoría</label>
+        <select id="filtro-categoria" onchange="renderIncidencias()" class="w-full md:max-w-xs bg-surface-dark border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50">
+          <option value="Todas">Todas</option>
+          <option value="Seguridad">Seguridad</option>
+          <option value="Mantenimiento">Mantenimiento</option>
+          <option value="Servicios">Servicios</option>
+          <option value="Mascotas">Mascotas</option>
+          <option value="Comunidad">Comunidad</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <p class="text-xs text-text-muted">Puedes editar tus propios avisos, subir imagen y abrir su ubicación sin salir de la app.</p>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div id="loading" class="flex flex-col items-center justify-center h-64 gap-4">
+      <div class="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-text-muted text-sm">Cargando incidencias...</p>
+    </div>
+    <div id="avisos-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 hidden"></div>
+    <div id="empty" class="hidden flex flex-col items-center justify-center h-64 gap-3">
+      <span class="material-icons-round text-text-muted text-5xl">inbox</span>
+      <p class="text-text-muted">No hay incidencias reportadas</p>
+    </div>
+  </div>
+</div>
+
+<div id="modal-nuevo" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-dark border border-border-dark rounded-2xl w-full max-w-lg shadow-2xl fade-up">
+    <div class="flex items-center justify-between p-6 border-b border-border-dark">
+      <h3 id="modal-title" class="text-lg font-bold text-white">Reportar incidencia</h3>
+      <button onclick="cerrarModal()" class="text-text-muted hover:text-white transition-colors"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Descripción *</label>
+        <textarea id="inp-desc" rows="3" placeholder="Describe lo que está pasando..." class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm placeholder-text-muted focus:outline-none focus:border-primary/50 resize-none"></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Prioridad</label>
+          <select id="inp-prioridad" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Crítica">Crítica</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Categoría</label>
+          <select id="inp-categoria" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50">
+            <option value="Seguridad">Seguridad</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Servicios">Servicios</option>
+            <option value="Mascotas">Mascotas</option>
+            <option value="Comunidad">Comunidad</option>
+            <option value="General">General</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Hora</label>
+          <input id="inp-hora" type="time" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Ubicación</label>
+          <button type="button" onclick="usarUbicacionActual()" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-text-muted text-sm text-left hover:border-primary/40 hover:text-white transition-colors">
+            Usar mi ubicación actual
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 block">Imagen del aviso</label>
+        <input id="inp-imagenes" type="file" accept="image/*" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"/>
+        <p id="imagenes-estado" class="text-xs text-text-muted mt-2">Sin imagen seleccionada.</p>
+      </div>
+      <input id="inp-lat" type="hidden"/>
+      <input id="inp-lon" type="hidden"/>
+      <button onclick="guardarIncidencia()" id="btn-reportar" class="w-full bg-primary text-bg-dark font-bold py-3 rounded-xl hover:bg-primary-dim transition-colors flex items-center justify-center gap-2">
+        <span class="material-icons-round">send</span> Enviar reporte
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-mapa" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-dark border border-border-dark rounded-2xl w-full max-w-4xl shadow-2xl fade-up overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-border-dark">
+      <div>
+        <h3 class="text-lg font-bold text-white">Ubicación del aviso</h3>
+        <p id="mapa-label" class="text-sm text-text-muted">Mapa del reporte</p>
+      </div>
+      <button onclick="cerrarMapa()" class="text-text-muted hover:text-white transition-colors"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <iframe id="mapa-frame" class="w-full h-[420px] rounded-2xl border border-border-dark bg-surface-darker" loading="lazy"></iframe>
+      <div class="flex justify-end">
+        <a id="mapa-link" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary-dim transition-colors">
+          <span class="material-icons-round text-base">open_in_new</span> Abrir mapa completo
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button onclick="location.href='panico.html'" class="fixed bottom-8 right-8 z-50 w-16 h-16 bg-sos rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform border-4 border-red-400 sos-pulse">
+  <span class="material-icons-round text-white text-2xl">emergency</span>
+  <span class="text-white text-[9px] font-black uppercase tracking-wider">SOS</span>
+</button>
+
+<script>
+const runtime = window.CentinelaRuntime
+const API = runtime ? runtime.serviceUrl(5001, '/api') : 'http://localhost:5001/api'
+const LOGIN_URL = runtime ? runtime.appUrl('login.html') : 'http://localhost:3000/login.html'
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || 'Vecino'
+const casa = localStorage.getItem('numeroCasa') || ''
+const rolActual = localStorage.getItem('rolActual') || 'usuario'
+let todasIncidencias = []
+let tabActual = 'activos'
+let editandoId = null
+let imagenesSeleccionadas = []
+
+if (!token) location.href = LOGIN_URL
+
+document.getElementById('user-name').textContent = nombre
+document.getElementById('user-casa').textContent = casa || 'Centinela'
+document.getElementById('user-initial').textContent = nombre.charAt(0).toUpperCase()
+document.getElementById('inp-hora').value = new Date().toTimeString().slice(0, 5)
+document.getElementById('inp-imagenes').addEventListener('change', manejarImagenes)
+
+function escapeXml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function cerrarSesion(e) {
+  e.stopPropagation()
+  localStorage.clear()
+  location.href = LOGIN_URL
+}
+
+function setTab(tab) {
+  tabActual = tab
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('border-primary', 'text-primary', 'bg-primary/10')
+    b.classList.add('border-transparent', 'text-text-muted')
+  })
+  const el = document.getElementById('tab-' + tab)
+  el.classList.add('border-primary', 'text-primary', 'bg-primary/10')
+  el.classList.remove('border-transparent', 'text-text-muted')
+  renderIncidencias()
+}
+
+function getColorConfig(prioridad) {
+  const colores = {
+    'Crítica': { border:'border-red-500/40', badge:'bg-red-500/10 text-red-400 border-red-500/30', dot:'bg-red-500', icon:'priority_high' },
+    'Media': { border:'border-yellow-500/30', badge:'bg-yellow-500/10 text-yellow-400 border-yellow-500/30', dot:'bg-yellow-500', icon:'warning' },
+    'Baja': { border:'border-border-dark', badge:'bg-primary/10 text-primary border-primary/20', dot:'bg-primary', icon:'info' },
+  }
+  return colores[prioridad] || colores['Baja']
+}
+
+async function cargarIncidencias() {
+  try {
+    const res = await fetch(`${API}/consultar_incidencias?rol=${rolActual}`)
+    const text = await res.text()
+    const xml = new DOMParser().parseFromString(text, 'text/xml')
+    const items = xml.getElementsByTagName('incidencia')
+    todasIncidencias = []
+    for (let i = 0; i < items.length; i++) {
+      const g = (tag) => items[i].getElementsByTagName(tag)[0]?.textContent || ''
+      todasIncidencias.push({
+        id: g('id'),
+        usuario: g('usuario'),
+        desc: g('descripcion'),
+        fecha: g('fecha'),
+        hora: g('hora'),
+        prioridad: g('prioridad') || 'Baja',
+        categoria: g('categoria') || 'General',
+        estado: g('estado') || 'Abierto',
+        lat: g('latitud'),
+        lon: g('longitud'),
+        imagenes: g('imagenes') || '[]',
+        casa: g('casa')
+      })
+    }
+    renderIncidencias()
+  } catch (e) {
+    document.getElementById('loading').innerHTML = `<p class="text-text-muted">Error al cargar incidencias. ¿Está corriendo el servicio en :5001?</p>`
+  }
+}
+
+function renderIncidencias() {
+  document.getElementById('loading').classList.add('hidden')
+  const grid = document.getElementById('avisos-grid')
+  grid.classList.remove('hidden')
+
+  const filtroCategoria = document.getElementById('filtro-categoria').value
+  let lista = [...todasIncidencias]
+  if (tabActual === 'activos') lista = lista.filter(i => i.estado !== 'Eliminado')
+  if (tabActual === 'mis') lista = lista.filter(i => i.usuario === nombre)
+  if (filtroCategoria !== 'Todas') lista = lista.filter(i => (i.categoria || 'General') === filtroCategoria)
+
+  if (lista.length === 0) {
+    grid.innerHTML = ''
+    document.getElementById('empty').classList.remove('hidden')
+    return
+  }
+  document.getElementById('empty').classList.add('hidden')
+
+  grid.innerHTML = lista.map(inc => {
+    const c = getColorConfig(inc.prioridad)
+    const esAdmin = rolActual === 'admin'
+    const esMio = inc.usuario === nombre
+    const activo = inc.estado !== 'Eliminado'
+    const puedeEditar = activo && esMio
+    const puedeEliminar = activo && (esAdmin || esMio)
+    let imgs = []
+    try { imgs = JSON.parse(inc.imagenes || '[]') } catch (e) {}
+
+    return `
+      <div class="card-hover bg-surface-dark border ${c.border} rounded-2xl overflow-hidden ${activo ? '' : 'opacity-50'}">
+        ${imgs[0] ? `<div class="h-40 overflow-hidden relative"><img src="${imgs[0]}" class="w-full h-full object-cover"/><span class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">${imgs.length} imagen(es)</span></div>` : ''}
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-3 gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${c.dot} ${inc.prioridad === 'Crítica' ? 'animate-pulse' : ''}"></span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${c.badge} inline-flex items-center gap-1">
+                <span class="material-icons-round text-[12px]">${c.icon}</span>${inc.prioridad}
+              </span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10 text-primary">${inc.categoria || 'General'}</span>
+              ${!activo ? '<span class="text-xs text-text-muted border border-border-dark px-2 py-0.5 rounded-full">Eliminada</span>' : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              ${inc.lat && inc.lon ? `<button onclick="verMapa(event,'${inc.lat}','${inc.lon}','${(inc.desc || '').replace(/'/g, '&#39;')}')" class="p-1.5 rounded-lg bg-surface-darker border border-border-dark text-text-muted hover:text-primary hover:border-primary/30 transition-colors"><span class="material-icons-round text-sm">location_on</span></button>` : ''}
+              ${puedeEditar ? `<button onclick="abrirEdicion(event,'${inc.id}')" class="p-1.5 rounded-lg bg-surface-darker border border-border-dark text-text-muted hover:text-primary hover:border-primary/30 transition-colors"><span class="material-icons-round text-sm">edit</span></button>` : ''}
+              ${puedeEliminar ? `<button onclick="eliminar(event,'${inc.id}')" class="p-1.5 rounded-lg bg-surface-darker border border-border-dark text-text-muted hover:text-sos hover:border-sos/30 transition-colors"><span class="material-icons-round text-sm">delete</span></button>` : (!activo && esAdmin ? `<button onclick="reactivar(event,'${inc.id}')" class="p-1.5 rounded-lg bg-surface-darker border border-border-dark text-text-muted hover:text-primary hover:border-primary/30 transition-colors"><span class="material-icons-round text-sm">restore</span></button>` : '')}
+            </div>
+          </div>
+          <p class="text-white text-sm leading-relaxed line-clamp-3 mb-3">${inc.desc}</p>
+          <div class="flex items-center justify-between text-xs text-text-muted gap-3">
+            <span class="flex items-center gap-1"><span class="material-icons-round text-xs">person</span>${inc.usuario}${inc.casa ? ' · ' + inc.casa : ''}</span>
+            <span>${inc.fecha} ${inc.hora}</span>
+          </div>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function resetFormulario() {
+  editandoId = null
+  imagenesSeleccionadas = []
+  document.getElementById('modal-title').textContent = 'Reportar incidencia'
+  document.getElementById('btn-reportar').innerHTML = '<span class="material-icons-round">send</span> Enviar reporte'
+  document.getElementById('inp-desc').value = ''
+  document.getElementById('inp-prioridad').value = 'Baja'
+  document.getElementById('inp-categoria').value = 'Seguridad'
+  document.getElementById('inp-hora').value = new Date().toTimeString().slice(0, 5)
+  document.getElementById('inp-lat').value = ''
+  document.getElementById('inp-lon').value = ''
+  document.getElementById('inp-imagenes').value = ''
+  document.getElementById('imagenes-estado').textContent = 'Sin imagen seleccionada.'
+}
+
+function abrirModalNuevo() {
+  resetFormulario()
+  document.getElementById('modal-nuevo').classList.remove('hidden')
+}
+
+function abrirEdicion(event, id) {
+  event.stopPropagation()
+  const inc = todasIncidencias.find(item => item.id === id)
+  if (!inc) return
+  editandoId = id
+  document.getElementById('modal-title').textContent = 'Editar aviso'
+  document.getElementById('btn-reportar').innerHTML = '<span class="material-icons-round">save</span> Guardar cambios'
+  document.getElementById('inp-desc').value = inc.desc || ''
+  document.getElementById('inp-prioridad').value = inc.prioridad || 'Baja'
+  document.getElementById('inp-categoria').value = inc.categoria || 'General'
+  document.getElementById('inp-hora').value = inc.hora || new Date().toTimeString().slice(0, 5)
+  document.getElementById('inp-lat').value = inc.lat || ''
+  document.getElementById('inp-lon').value = inc.lon || ''
+  document.getElementById('inp-imagenes').value = ''
+  try { imagenesSeleccionadas = JSON.parse(inc.imagenes || '[]') } catch (e) { imagenesSeleccionadas = [] }
+  document.getElementById('imagenes-estado').textContent = imagenesSeleccionadas.length ? `${imagenesSeleccionadas.length} imagen(es) guardada(s) en este aviso.` : 'Sin imagen seleccionada.'
+  document.getElementById('modal-nuevo').classList.remove('hidden')
+}
+
+function cerrarModal() {
+  document.getElementById('modal-nuevo').classList.add('hidden')
+}
+
+async function usarUbicacionActual() {
+  if (!navigator.geolocation) {
+    alert('Tu navegador no soporta geolocalización')
+    return
+  }
+  try {
+    const coords = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve(pos.coords),
+        err => reject(err),
+        { timeout: 6000, enableHighAccuracy: true }
+      )
+    })
+    document.getElementById('inp-lat').value = coords.latitude
+    document.getElementById('inp-lon').value = coords.longitude
+    alert('Ubicación guardada para este aviso')
+  } catch (e) {
+    alert('No se pudo obtener la ubicación')
+  }
+}
+
+async function manejarImagenes(event) {
+  const files = Array.from(event.target.files || [])
+  if (!files.length) {
+    document.getElementById('imagenes-estado').textContent = imagenesSeleccionadas.length ? `${imagenesSeleccionadas.length} imagen(es) guardada(s) en este aviso.` : 'Sin imagen seleccionada.'
+    return
+  }
+  imagenesSeleccionadas = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })))
+  document.getElementById('imagenes-estado').textContent = `${imagenesSeleccionadas.length} imagen(es) lista(s) para subir.`
+}
+
+async function guardarIncidencia() {
+  const desc = document.getElementById('inp-desc').value.trim()
+  const prio = document.getElementById('inp-prioridad').value
+  const categoria = document.getElementById('inp-categoria').value
+  const hora = document.getElementById('inp-hora').value
+  let lat = document.getElementById('inp-lat').value
+  let lon = document.getElementById('inp-lon').value
+
+  if (!desc) return alert('Escribe una descripción')
+
+  const btn = document.getElementById('btn-reportar')
+  const htmlOriginal = btn.innerHTML
+  btn.textContent = editandoId ? 'Guardando...' : 'Enviando...'
+  btn.disabled = true
+
+  if (!lat && !editandoId && navigator.geolocation) {
+    try {
+      const coords = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(pos => resolve(pos.coords), err => reject(err), { timeout: 3000 })
+      })
+      lat = coords.latitude
+      lon = coords.longitude
+    } catch (e) {}
+  }
+
+  const fecha = new Date().toISOString().split('T')[0]
+  const imagenesXml = escapeXml(JSON.stringify(imagenesSeleccionadas))
+  const xml = editandoId
+    ? `<editar><id>${escapeXml(editandoId)}</id><descripcion>${escapeXml(desc)}</descripcion><hora>${escapeXml(hora)}</hora><prioridad>${escapeXml(prio)}</prioridad><categoria>${escapeXml(categoria)}</categoria><latitud>${escapeXml(lat)}</latitud><longitud>${escapeXml(lon)}</longitud><imagenes>${imagenesXml}</imagenes></editar>`
+    : `<reporte><usuario>${escapeXml(nombre)}</usuario><fecha>${escapeXml(fecha)}</fecha><hora>${escapeXml(hora)}</hora><prioridad>${escapeXml(prio)}</prioridad><categoria>${escapeXml(categoria)}</categoria><descripcion>${escapeXml(desc)}</descripcion><latitud>${escapeXml(lat)}</latitud><longitud>${escapeXml(lon)}</longitud><imagenes>${imagenesXml}</imagenes></reporte>`
+
+  try {
+    const res = await fetch(`${API}/${editandoId ? 'editar_incidencia' : 'reportar_incidencia'}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/xml', 'Authorization': `Token ${token}` },
+      body: xml
+    })
+    const txt = await res.text()
+    const xDoc = new DOMParser().parseFromString(txt, 'text/xml')
+    if (xDoc.getElementsByTagName('estado')[0]?.textContent === 'OK') {
+      cerrarModal()
+      resetFormulario()
+      await cargarIncidencias()
+    } else {
+      alert(`No se pudo ${editandoId ? 'editar' : 'reportar'} el aviso`)
+    }
+  } catch (e) {
+    alert('Error de conexión con :5001')
+  } finally {
+    btn.innerHTML = htmlOriginal
+    btn.disabled = false
+  }
+}
+
+async function eliminar(e, id) {
+  e.stopPropagation()
+  if (!confirm('¿Ocultar este reporte?')) return
+  await fetch(`${API}/eliminar_incidencia`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/xml', 'Authorization': `Token ${token}` },
+    body: `<eliminar><id>${escapeXml(id)}</id></eliminar>`
+  })
+  cargarIncidencias()
+}
+
+async function reactivar(e, id) {
+  e.stopPropagation()
+  await fetch(`${API}/reactivar_incidencia`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/xml', 'Authorization': `Token ${token}` },
+    body: `<reactivar><id>${escapeXml(id)}</id></reactivar>`
+  })
+  cargarIncidencias()
+}
+
+function buildMapUrls(lat, lon) {
+  const latNum = Number(lat)
+  const lonNum = Number(lon)
+  const delta = 0.004
+  const bbox = `${lonNum - delta}%2C${latNum - delta}%2C${lonNum + delta}%2C${latNum + delta}`
+  return {
+    iframe: `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latNum}%2C${lonNum}`,
+    open: `https://www.openstreetmap.org/?mlat=${latNum}&mlon=${lonNum}&zoom=17`
+  }
+}
+
+function verMapa(event, lat, lon, descripcion = 'Ubicación del aviso') {
+  if (event) event.stopPropagation()
+  const urls = buildMapUrls(lat, lon)
+  document.getElementById('mapa-frame').src = urls.iframe
+  document.getElementById('mapa-link').href = urls.open
+  document.getElementById('mapa-label').textContent = descripcion || 'Ubicación del aviso'
+  document.getElementById('modal-mapa').classList.remove('hidden')
+}
+
+function cerrarMapa() {
+  document.getElementById('modal-mapa').classList.add('hidden')
+  document.getElementById('mapa-frame').src = ''
+}
+
+cargarIncidencias()
+</script>
+<script src="js/sos-draggable.js"></script>
+</body>
+</html>

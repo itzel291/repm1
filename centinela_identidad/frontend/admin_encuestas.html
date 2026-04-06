@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela - Panel de Encuestas</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444',
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+</head>
+<body class="h-screen overflow-hidden flex text-white" data-page="admin-encuestas">
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Panel de administracion</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <div class="px-3 pb-2">
+      <p class="text-xs text-border-dark font-semibold uppercase tracking-widest">Administracion</p>
+    </div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+    <a href="admin_encuestas.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><span class="material-icons-round text-xl">how_to_vote</span>Panel de encuestas</a>
+    <a href="admin_configuracion.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">settings</span>Configuracion</a>
+  </nav>
+</aside>
+
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Panel de encuestas</h2>
+      <p class="text-text-muted text-sm">Crea consultas, cierralas, vuelve a abrirlas y revisa resultados.</p>
+    </div>
+  </header>
+  <main class="flex-1 overflow-y-auto p-8">
+    <section class="grid grid-cols-1 xl:grid-cols-[420px_minmax(0,1fr)] gap-6">
+      <div class="space-y-6">
+        <article class="rounded-3xl border border-border-dark bg-surface-dark p-6 space-y-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.25em] text-text-muted">Nueva encuesta</p>
+            <h3 class="text-xl font-bold text-white mt-2">Crear consulta</h3>
+          </div>
+          <input id="consulta-titulo" type="text" placeholder="Titulo de la encuesta" class="w-full rounded-2xl border border-border-dark bg-surface-darker px-4 py-3 text-white placeholder-text-muted outline-none focus:border-primary/40"/>
+          <textarea id="consulta-pregunta" rows="3" placeholder="Pregunta principal" class="w-full rounded-2xl border border-border-dark bg-surface-darker px-4 py-3 text-white placeholder-text-muted outline-none focus:border-primary/40 resize-none"></textarea>
+          <div id="consulta-opciones" class="space-y-3"></div>
+          <button type="button" id="agregar-opcion" class="w-full rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3 font-medium text-primary hover:bg-primary/15 transition-colors">Agregar opcion</button>
+          <button type="button" onclick="CentinelaDecisiones.crearConsulta()" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-bg-dark hover:bg-primary-dim transition-colors">Crear encuesta</button>
+        </article>
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.25em] text-text-muted">Encuestas creadas</p>
+              <h3 class="text-lg font-bold text-white mt-2">Gestion de consultas</h3>
+            </div>
+            <p class="text-xs text-text-muted">Se acomodan automaticamente segun el espacio disponible.</p>
+          </div>
+          <div id="admin-encuestas-lista" class="grid grid-cols-1 2xl:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
+      <div id="admin-resultados"></div>
+    </section>
+  </main>
+</div>
+<script src="js/decisiones-app.js?v=20260331d"></script>
+</body>
+</html>

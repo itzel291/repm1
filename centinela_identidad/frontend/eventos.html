@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centinela — Eventos</title>
+<script src="js/session-bridge.js"></script>
+<script src="js/ui-preferences.js"></script>
+<link rel="stylesheet" href="css/ui-shell.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { colors: {
+    primary: '#0DF2CC', 'primary-dim': '#0BC4A5',
+    'bg-dark': '#0D1C19', 'surface-dark': '#152321',
+    'surface-darker': '#0F1A17', sidebar: '#0A1512',
+    'border-dark': '#1E3330', 'text-muted': '#6B9E96', sos: '#EF4444',
+  }, fontFamily: { sans: ['Outfit','sans-serif'] } } }
+}
+</script>
+<style>
+* { font-family:'Outfit',sans-serif; }
+body { background:#0D1C19; }
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1E3330;border-radius:99px}
+@keyframes sos-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}
+.sos-pulse{animation:sos-pulse 2s infinite}
+.nav-item{transition:all .2s ease}
+.nav-item:hover{background:rgba(13,242,204,.06);color:#0DF2CC}
+.nav-item.active{background:rgba(13,242,204,.12);color:#0DF2CC}
+.card-hover{transition:transform .2s,box-shadow .2s}
+.card-hover:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(13,242,204,.1)}
+.ev-img{transition:transform .5s ease}
+.ev-card:hover .ev-img{transform:scale(1.05)}
+.calendar-day{transition:all .2s ease}
+.calendar-day:hover{border-color:rgba(13,242,204,.35);transform:translateY(-1px)}
+.calendar-day.has-events{background:rgba(13,242,204,.08)}
+.calendar-day.selected{border-color:rgba(13,242,204,.7);box-shadow:0 0 0 1px rgba(13,242,204,.25) inset}
+</style>
+</head>
+<body class="h-screen overflow-hidden flex text-white">
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-sidebar flex flex-col h-full border-r border-border-dark shrink-0 z-30">
+  <div class="h-20 flex items-center px-6 border-b border-border-dark">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                               <img src="assets/im2.jpeg" style="width: 40px; height: 40px; border-radius: 100px;">
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-white leading-none">Centinela</h1>
+        <p class="text-text-muted text-xs mt-0.5">Privada La Condesa</p>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">home</span>Inicio</a>
+    <a href="avisos.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">campaign</span>Avisos</a>
+    <a href="publicaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">article</span>Publicaciones</a>
+    <a href="eventos.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium"><span class="material-icons-round text-xl">event</span>Eventos</a>
+    <a href="chat.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">chat_bubble_outline</span>Mensajes</a>
+    <a href="notificaciones.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">notifications_none</span>Notificaciones<span class="ml-auto bg-primary text-bg-dark text-xs font-bold px-1.5 py-0.5 rounded-full hidden" id="nav-badge-count">0</span></a>
+    <a href="noticias.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">newspaper</span>Noticias</a>
+    <a href="historial.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">history</span>Historial</a>
+    <a href="perfil.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">person_outline</span>Perfil</a>
+    <div class="pt-4 pb-2"><p class="text-xs text-border-dark font-semibold uppercase tracking-widest px-3">Administración</p></div>
+    <a href="admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-muted text-sm font-medium"><span class="material-icons-round text-xl">shield</span>Panel de seguridad</a>
+  </nav>
+  <div class="p-4 border-t border-border-dark">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-dark cursor-pointer transition-colors" onclick="location.href='perfil.html'">
+      <div class="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm" id="user-initial">M</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white truncate" id="user-name">Vecino</p>
+        <p class="text-xs text-text-muted truncate" id="user-casa">Casa</p>
+      </div>
+      <button onclick="cerrarSesion(event)" class="text-text-muted hover:text-sos transition-colors"><span class="material-icons-round text-base">logout</span></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+  <header class="h-20 bg-surface-darker border-b border-border-dark flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h2 class="text-xl font-bold text-white">Eventos</h2>
+      <p class="text-text-muted text-sm">Actividades de la comunidad</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="abrirNuevoEvento()" class="flex items-center gap-2 px-4 py-2 bg-primary text-bg-dark font-bold rounded-xl hover:bg-primary-dim transition-colors text-sm">
+        <span class="material-icons-round text-lg">add</span> Nuevo evento
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 px-8 pt-5 border-b border-border-dark shrink-0">
+    <button onclick="location.href='avisos.html'" class="px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-text-muted hover:text-white transition-all">Avisos</button>
+    <button onclick="location.href='publicaciones.html'" class="px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-text-muted hover:text-white transition-all">Publicaciones</button>
+    <button class="px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-primary text-primary bg-primary/10">Eventos</button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-8 space-y-8">
+
+    <section class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_340px] gap-6">
+      <article class="bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.25em] text-text-muted">Calendario</p>
+            <h3 id="calendar-month-label" class="text-2xl font-bold text-white mt-2">Mes actual</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="calendar-prev" class="w-11 h-11 rounded-2xl border border-border-dark bg-surface-darker text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+              <span class="material-icons-round">chevron_left</span>
+            </button>
+            <button id="calendar-today" class="px-4 py-2 rounded-2xl border border-border-dark bg-surface-darker text-sm text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+              Hoy
+            </button>
+            <button id="calendar-next" class="w-11 h-11 rounded-2xl border border-border-dark bg-surface-darker text-text-muted hover:text-white hover:border-primary/30 transition-colors">
+              <span class="material-icons-round">chevron_right</span>
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-7 gap-2 mb-3 text-xs uppercase tracking-widest text-text-muted">
+          <div class="text-center py-2">Lun</div>
+          <div class="text-center py-2">Mar</div>
+          <div class="text-center py-2">Mie</div>
+          <div class="text-center py-2">Jue</div>
+          <div class="text-center py-2">Vie</div>
+          <div class="text-center py-2">Sab</div>
+          <div class="text-center py-2">Dom</div>
+        </div>
+        <div id="events-calendar-grid" class="grid grid-cols-7 gap-2">
+          <div class="col-span-full bg-surface-darker border border-border-dark rounded-2xl p-6 text-text-muted text-center">Cargando calendario...</div>
+        </div>
+      </article>
+
+      <article class="bg-surface-dark border border-border-dark rounded-3xl p-6">
+        <div class="mb-5">
+          <p class="text-xs uppercase tracking-[0.25em] text-text-muted">Agenda del dia</p>
+          <h3 id="calendar-selected-date-label" class="text-xl font-bold text-white mt-2">Selecciona un dia</h3>
+        </div>
+        <div id="calendar-selected-events" class="space-y-3">
+          <div class="bg-surface-darker border border-border-dark rounded-2xl p-4 text-text-muted text-sm">Selecciona un dia del calendario para ver sus eventos.</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Action buttons -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <button onclick="abrirNuevoEvento()" class="group relative overflow-hidden bg-primary/10 border border-primary/20 rounded-2xl p-8 flex items-center justify-center gap-4 hover:bg-primary/20 hover:border-primary/40 transition-all">
+        <span class="material-icons-round text-primary text-4xl">add</span>
+        <span class="text-xl font-bold text-primary">Nuevo evento</span>
+      </button>
+      <button onclick="verMisEventos()" class="group relative overflow-hidden bg-surface-dark border border-border-dark rounded-2xl p-8 flex items-center justify-center gap-4 hover:border-primary/30 transition-all">
+        <span class="material-icons-round text-text-muted text-4xl group-hover:text-primary transition-colors">visibility</span>
+        <span class="text-xl font-bold text-text-muted group-hover:text-white transition-colors">Ver tus eventos</span>
+      </button>
+    </div>
+
+    <!-- Events grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="events-grid">
+      <div class="col-span-full bg-surface-dark border border-border-dark rounded-2xl p-8 text-text-muted text-center">Cargando eventos reales...</div>
+    </div>
+    <div class="h-10"></div>
+  </div>
+</div>
+
+<!-- Modal nuevo evento -->
+<div id="modal-evento" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-dark border border-border-dark rounded-2xl w-full max-w-lg shadow-2xl">
+    <div class="flex items-center justify-between p-6 border-b border-border-dark">
+      <h3 class="text-lg font-bold text-white">Nuevo Evento</h3>
+      <button onclick="document.getElementById('modal-evento').classList.add('hidden')" class="text-text-muted hover:text-white transition-colors"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="p-6 space-y-4">
+      <input id="evt-titulo" placeholder="Título del evento *" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm placeholder-text-muted focus:outline-none focus:border-primary/50"/>
+      <textarea id="evt-desc" placeholder="Descripción..." rows="3" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm placeholder-text-muted focus:outline-none focus:border-primary/50 resize-none"></textarea>
+      <div class="grid grid-cols-2 gap-4">
+        <input id="evt-fecha" type="date" class="bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"/>
+        <input id="evt-hora" type="text" placeholder="HH:MM (ej: 10:00)" class="bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm placeholder-text-muted focus:outline-none focus:border-primary/50"/>
+      </div>
+      <select id="evt-categoria" class="w-full bg-surface-darker border border-border-dark rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50">
+        <option value="Cultural">Cultural</option>
+        <option value="Deportivo">Deportivo</option>
+        <option value="Comunitario">Comunitario</option>
+        <option value="Seguridad">Seguridad</option>
+        <option value="Educativo">Educativo</option>
+      </select>
+      <button onclick="crearEvento()" class="w-full bg-primary text-bg-dark font-bold py-3 rounded-xl hover:bg-primary-dim transition-colors flex items-center justify-center gap-2">
+        <span class="material-icons-round">event</span> Crear evento
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ver mis eventos -->
+<div id="modal-mis-eventos" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-dark border border-border-dark rounded-2xl w-full max-w-xl shadow-2xl max-h-[80vh] flex flex-col">
+    <div class="flex items-center justify-between p-6 border-b border-border-dark shrink-0">
+      <h3 class="text-lg font-bold text-white">Mis eventos creados</h3>
+      <button onclick="document.getElementById('modal-mis-eventos').classList.add('hidden')" class="text-text-muted hover:text-white transition-colors">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-6" id="mis-eventos-lista">
+      <!-- Renderizado por JS -->
+    </div>
+  </div>
+</div>
+
+<!-- SOS -->
+<button onclick="location.href='panico.html'" class="sos-pulse fixed bottom-8 right-8 z-50 w-16 h-16 bg-sos rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform border-4 border-red-400">
+  <span class="material-icons-round text-white text-2xl">emergency</span>
+  <span class="text-white text-[9px] font-black uppercase tracking-wider">SOS</span>
+</button>
+
+<script id="legacy-eventos-script" type="text/plain">
+const token = localStorage.getItem('token')
+const nombre = localStorage.getItem('usuarioActual') || 'Vecino'
+const casa = localStorage.getItem('numeroCasa') || ''
+const runtime = window.CentinelaRuntime
+const LOGIN_URL = runtime ? runtime.appUrl('login.html') : 'http://localhost:3000/login.html'
+if (!token) location.href = LOGIN_URL
+document.getElementById('user-name').textContent = nombre
+document.getElementById('user-casa').textContent = casa || 'Centinela'
+document.getElementById('user-initial').textContent = nombre.charAt(0).toUpperCase()
+function cerrarSesion(e) { e.stopPropagation(); localStorage.clear(); location.href = LOGIN_URL }
+function abrirNuevoEvento() { document.getElementById('modal-evento').classList.remove('hidden') }
+
+function crearEvento() {
+  const titulo = document.getElementById('evt-titulo').value.trim()
+  if (!titulo) { alert('⚠️ El título es obligatorio'); return }
+  const eventos = JSON.parse(localStorage.getItem('eventos_locales') || '[]')
+  eventos.push({
+    titulo,
+    descripcion: document.getElementById('evt-desc').value.trim(),
+    fecha: document.getElementById('evt-fecha').value,
+    hora: document.getElementById('evt-hora').value.trim(),
+    autor: localStorage.getItem('usuarioActual') || 'Vecino',
+    creado: new Date().toLocaleDateString('es')
+  })
+  localStorage.setItem('eventos_locales', JSON.stringify(eventos))
+  document.getElementById('evt-titulo').value = ''
+  document.getElementById('evt-desc').value = ''
+  document.getElementById('evt-fecha').value = ''
+  document.getElementById('evt-hora').value = ''
+  document.getElementById('modal-evento').classList.add('hidden')
+  alert('✅ Evento creado')
+}
+
+function verMisEventos() {
+  const eventos = JSON.parse(localStorage.getItem('eventos_locales') || '[]')
+  const lista = document.getElementById('mis-eventos-lista')
+  if (eventos.length === 0) {
+    lista.innerHTML = `
+      <div class="text-center py-10">
+        <span class="material-icons-round text-text-muted text-5xl block mb-3">event_busy</span>
+        <p class="text-text-muted text-sm">No has creado eventos aún.</p>
+      </div>`
+  } else {
+    lista.innerHTML = eventos.slice().reverse().map(ev => `
+      <div class="bg-surface-darker border border-border-dark rounded-xl p-4 mb-3">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <h4 class="font-bold text-white text-sm">${ev.titulo}</h4>
+          <span class="text-text-muted text-xs shrink-0">${ev.creado || ''}</span>
+        </div>
+        ${ev.descripcion ? `<p class="text-text-muted text-sm mb-2">${ev.descripcion}</p>` : ''}
+        ${(ev.fecha || ev.hora) ? `
+          <div class="flex items-center gap-2 text-primary text-xs font-semibold mt-2">
+            <span class="material-icons-round text-sm">calendar_today</span>
+            ${ev.fecha || ''}${ev.hora ? ' · ' + ev.hora : ''}
+          </div>` : ''}
+      </div>`).join('')
+  }
+  document.getElementById('modal-mis-eventos').classList.remove('hidden')
+}
+</script>
+<script src="js/eventos-app.js"></script>
+<script src="js/sos-draggable.js"></script>
+</body>
+</html>
